@@ -1,0 +1,89 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+using System.IO;
+using System;
+using GameContentsEditor;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Text;
+
+public class MoqiQieHuangZS : EditorWindow {
+    public string Path_Client = @"E:\prpr\yxcs\my_yxcs_git\DataConfigBuild\DataConfigs";
+    public string Path_ZhengShi = @"E:\prpr\yxcs\my_yxcs_git\DataConfigBuild_Official\DataConfigs";
+
+    [MenuItem("脚本工具/万俟工具/切换正式without_B")]
+    public static void ShowWindow() {
+        var win = EditorWindow.GetWindow(typeof(MoqiQieHuangZS));
+        win.Show();
+
+    }
+    void OnGUI() {
+        EditorGUILayout.BeginHorizontal();
+        EditorGUI.BeginDisabledGroup(true);
+        Path_Client = EditorGUILayout.TextArea(Path_Client, EditorStyles.label);
+        EditorGUI.EndDisabledGroup();
+        if (GUILayout.Button("选择客户端路径", GUILayout.Width(100))) {
+            string currentDirectory;
+
+            if (String.IsNullOrEmpty(Path_Client)) {
+                currentDirectory = Directory.GetCurrentDirectory();
+            } else {
+                currentDirectory = Path_Client;
+            }
+
+            var tmpPath = EditorUtility.OpenFolderPanel("", currentDirectory, "");
+            if (!string.IsNullOrEmpty(tmpPath)) {
+                Path_Client = tmpPath;
+            }
+        }
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        EditorGUI.BeginDisabledGroup(true);
+        Path_ZhengShi = EditorGUILayout.TextArea(Path_ZhengShi, EditorStyles.label);
+        EditorGUI.EndDisabledGroup();
+        if (GUILayout.Button("选择客户端路径", GUILayout.Width(100))) {
+            string currentDirectory;
+
+            if (String.IsNullOrEmpty(Path_ZhengShi)) {
+                currentDirectory = Directory.GetCurrentDirectory();
+            } else {
+                currentDirectory = Path_ZhengShi;
+            }
+
+            var tmpPath = EditorUtility.OpenFolderPanel("", currentDirectory, "");
+            if (!string.IsNullOrEmpty(tmpPath)) {
+                Path_ZhengShi = tmpPath;
+            }
+        }      
+        EditorGUILayout.EndHorizontal();
+
+        if (GUILayout.Button("开始切换", GUILayout.Width(100))) {
+            DirectoryInfo ZS_info = new DirectoryInfo(Path_ZhengShi);
+            DirectoryInfo ZS_info_chinese = new DirectoryInfo(Path_ZhengShi + "\\Languages\\chinese");
+            try {
+                foreach (FileInfo f in ZS_info.GetFiles()) {
+                    if (File.Exists(Path_Client + "\\" + f.Name)) {
+                        File.Delete(Path_Client + "\\" + f.Name);
+                    }
+                    f.CopyTo(Path_Client + "\\" + f.Name);
+                }
+
+                foreach (FileInfo f in ZS_info_chinese.GetFiles()) {
+                    if (File.Exists(Path_Client + "\\Languages\\chinese\\" + f.Name)) {
+                        File.Delete(Path_Client + "\\Languages\\chinese\\" + f.Name);
+                    }
+                    f.CopyTo(Path_Client + "\\Languages\\chinese\\" + f.Name);
+                }
+                var win = EditorWindow.GetWindow(typeof(MoqiQieHuangZS));
+                win.Close();
+
+            } catch (Exception) {
+                Debug.LogError("========error==========");
+            }
+            
+        }
+    }
+}
