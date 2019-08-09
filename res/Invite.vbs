@@ -30,7 +30,8 @@ strForm1 = _
 "Private WithEvents Button_Agree As CommandButton" & vbCr & _
 "Private WithEvents Button_DisAgree As Image" & vbCr & _
 "Private WithEvents txt_test as MSForms.textbox" & vbCr & _
-"Private Sub UserForm_Initialize()" & vbCr & _
+"Public num As Integer" & vbCr & _
+"Private Sub UserForm_Initialize()" & vbCr & _												
 "	UserForm1.Caption = ""周****吧(@′?`@)""" & vbCr & _
 "	UserForm1.Picture = LoadPicture("""& WS.CurrentDirectory & "\BG.jpg"")" & vbCr & _
 "	UserForm1.Width = 800" & vbCr & _
@@ -38,7 +39,6 @@ strForm1 = _
 "	LoadButton_agree" & vbCr & _
 "	LoadButton_disagree" & vbCr & _
 "	LoadTextBox" & vbCr & _
-"	'LoadImg" & vbCr & _
 "End Sub" & vbCr & _
 "Public Function GetXCursorPos() As Long" & vbCrLf & _ 
 "Dim pt As POINTAPI : GetCursorPos pt : GetXCursorPos = pt.X" & vbCrLf & _ 
@@ -46,10 +46,10 @@ strForm1 = _
 "Public Function GetYCursorPos() As Long" & vbCrLf & _ 
 "Dim pt As POINTAPI: GetCursorPos pt : GetYCursorPos = pt.Y" & vbCrLf & _ 
 "End Function" & vbCrLf & _ 
-"Private Sub UserForm_Click()" & vbCr & _
-"   MsgBox ""test"",vbYesNoCancel+vbInformation+vbDefaultButton1,""ForTest""" & vbCr & _
-"End Sub" & vbCr & _
-"Private Sub LoadButton_agree()" & vbCr & _
+" 'Private Sub UserForm_Click()" & vbCr & _
+" '   MsgBox ""test"",vbYesNoCancel+vbInformation+vbDefaultButton1,""ForTest""" & vbCr & _
+" 'End Sub" & vbCr & _
+"Private Sub LoadButton_agree()" & vbCr & _	
 "	Set Button_Agree = Controls.Add(""Forms.CommandButton.1"", ""button"", True)" & vbCr & _
 "	With Button_Agree" & vbCr & _
 "	.Visible = True" & vbCr & _
@@ -63,7 +63,7 @@ strForm1 = _
 "	MsgBox ""Hello, "",vbYesNoCancel+vbInformation+vbDefaultButton1,""提示:""" & vbCr & _
 "	txt_test.Text = ""moqi""" & vbCr & _
 "End Sub" & vbCr & _
-"Private Sub LoadButton_disagree()" & vbCr & _
+"Private Sub LoadButton_disagree()" & vbCr & _	
 "	Set Button_DisAgree = Controls.Add(""Forms.Image.1"", ""Image"", True)" & vbCr & _
 "	With Button_DisAgree" & vbCr & _
 "	.Visible = True" & vbCr & _
@@ -94,45 +94,59 @@ strForm1 = _
 "	.Text = ""ss""" & vbCr & _
 "	End With" & vbCr & _
 "End Sub" & vbCr & _
-"Public Sub SetText(str As String)" & vbCr & _
+"	Public Sub SetText(str As String)" & vbCr & _
 "txt_test.Text = str" & vbCr & _
+"End Sub" & vbCr & _
+"Private Sub UserForm_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)" & vbCr & _
+"	If Button = 1 Then" & vbCr & _
+"		MsgBox ""Hello, "",vbYesNoCancel+vbInformation+vbDefaultButton1,""提示:""" & vbCr & _
+"		txt_test.Text = num" & vbCr & _
+"	End If" & vbCr & _
+"	If Button = 2 Then" & vbCr & _
+"		MsgBox ""Hello2, "",vbYesNoCancel+vbInformation+vbDefaultButton1,""提示:""" & vbCr & _
+"	End If" & vbCr & _
+"End Sub" & vbCr & _
+"Public Sub numJia()" & vbCr & _
+"	num = num+1" & vbCr & _
 "End Sub"
-
 Form1.CodeModule.AddFromString strForm1   '添加代码
 
 '=========================模块===================================='
 strCode = strCode & vbCr & _
-"Private Declare PtrSafe Function SetTimer Lib ""user32.dll"" (ByVal hwnd As Long, ByVal nIDEvent As Long, ByVal uElapse As Long, ByVal lpTimerFunc As Long) As Long " & vbCr & _
+"Private Declare PtrSafe Function SetTimer Lib ""user32.dll"" (ByVal hwnd As Long, ByVal nIDEvent As Long, ByVal uElapse As Long, ByVal lpTimerFunc As Long) As longprt" & vbCr & _
 "Private Declare PtrSafe Function KillTimer Lib ""user32.dll"" (ByVal hwnd As Long, ByVal nIDEvent As Long) As Long " & vbCr & _
 "Public lTimerID As long" & vbCr & _
 "Sub LoadForm()" & vbCr & _
 "   Dim count" & vbCr & _
 " 	count = 2" & vbCr & _
+"	StartTimer" & vbCr & _
 "	do Until count = 0" & vbCr & _
-"	UserForm1.show" & vbCr & _
-"	StartTimer(1)" & vbCr & _
-"	count = count - 1" & vbCr & _
+"		UserForm1.show" & vbCr & _
+"		count = count - 1" & vbCr & _
 "	Loop" & vbCr & _
 "End Sub" & vbCr & _
-"'启动定时器，IDuration是定时器触发的时间，单位为毫秒" & vbCr & _
-"Sub StartTimer(lDuration As long)" & vbCr & _
-"'如果定时器不存在，则设置定时器，定时器触发的时间为IDuration，定时器触发后执行OnTime" & vbCr & _
-"If lTimerID = 0 Then" & vbCr & _
-"lTimerID = SetTimer(0&, 0&, lDuration, AddressOf OnTime)" & vbCr & _
-"'否则停止定时器，并设置一个新的定时器" & vbCr & _
-"Else" & vbCr & _
-"Call StopTimer" & vbCr & _
-"lTimerID = SetTimer(0&, 0&, lDuration, AddressOf OnTime)" & vbCr & _
-"End If" & vbCr & _
+"Sub StartTimer()" & vbCr & _
+"	If lTimerID = 0 Then" & vbCr & _
+"		lTimerID = SetTimer(0&, 0&, 1, AddressOf OnTime)" & vbCr & _
+"	Else" & vbCr & _
+"		Call StopTimer" & vbCr & _
+"		lTimerID = SetTimer(0&, 0&, 1, AddressOf OnTime)" & vbCr & _
+"	End If" & vbCr & _
 "End Sub" & vbCr & _
 "Sub StopTimer()" & vbCr & _
-"KillTimer 0&, lTimerID" & vbCr & _
+"	KillTimer 0&, lTimerID" & vbCr & _
 "End Sub" & vbCr & _
-"Sub OnTime()" & vbCr & _
-"' 计时器触发后运行的代码放在这" & vbCr & _
-"	UserForm1.SetText(GetXCursorPos&"""")" & vbCr & _
-"	Cells(1, 1) = Now" & vbCr & _
+"Sub OnTime(ByVal HWnd As Long, ByVal uMsg As Long, ByVal nIDEvent As Long, ByVal dwTimer As Long)" & vbCr & _
+"	'UserForm1.numJia" & vbCr & _
 "End Sub"
+'Sub XunH()
+'	isRun = False
+'	while not isRun
+'		
+'	Wend
+'End Sub
+
+
 
 oModule.CodeModule.AddFromString strCode  '添加代码
 
