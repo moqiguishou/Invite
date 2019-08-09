@@ -1,0 +1,7 @@
+D:\桌面\Client\Server2\Server2\bin\Debug\Server2.exe.config
+D:\桌面\Client\Server2\Server2\bin\Debug\Server2.exe
+D:\桌面\Client\Server2\Server2\bin\Debug\Server2.pdb
+D:\桌面\Client\Server2\Server2\obj\Debug\Server2.csprojAssemblyReference.cache
+D:\桌面\Client\Server2\Server2\obj\Debug\Server2.csproj.CoreCompileInputs.cache
+D:\桌面\Client\Server2\Server2\obj\Debug\Server2.exe
+D:\桌面\Client\Server2\Server2\obj\Debug\Server2.pdb
