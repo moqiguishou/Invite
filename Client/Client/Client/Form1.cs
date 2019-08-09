@@ -91,7 +91,17 @@ namespace Client {
             }
         }
         private void button2_Click(object sender, EventArgs e) {
-                isShow = true;
+            int x = Control.MousePosition.X;
+            int y = Control.MousePosition.Y;
+            int win_x = this.Location.X;
+            int win_y = this.Location.Y;
+            string str = "mouse:" + x + "," + y + "; win:" + win_x + "," + win_y + "; opposite:" + (x - win_x) + "," + (y - win_y) + ";";
+            textBox1.Text = str;
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e) {
+
+            textBox1.Text = e.X + "," + e.Y;
         }
 
     }
