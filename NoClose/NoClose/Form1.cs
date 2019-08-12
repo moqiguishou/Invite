@@ -16,27 +16,32 @@ namespace NoClose {
         /// <summary>
         /// 很关键
         /// </summary>
-        protected override CreateParams CreateParams {
-            get {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000;
-                return cp;
-            }
+        //protected override CreateParams CreateParams {
+        //    get {
+        //        CreateParams cp = base.CreateParams;
+        //        cp.ExStyle |= 0x02000000;
+        //        return cp;
+        //    }
 
-        }
+        //}
         //控制
         private bool isOver=false;
+        private bool isZi=true;
         private bool isALi=false;
+        private int time_zi=100;
         //范围
         private RectangleF r_bg = new RectangleF(0, 0, 1366f, 768f);
         private RectangleF r_agree = new RectangleF(0, 0, 100, 100);
         private RectangleF r_disagree = new RectangleF(150, 0, 100, 100);
         private RectangleF r_ALi = new RectangleF(1015, 158, 200, 280);
+        private RectangleF r_ALi_chat = new RectangleF(700, 180, 350, 100);
+        private RectangleF r_Tao_chat = new RectangleF(141, 235, 500, 200);
 
         private int[] zi_x= {1000,1050,1100,1150,1030,1080,1070,1120};
         private int[] zi_y= { 200, 210, 220, 230, 265, 275, 325,335 };
-        private int[] zi_width;
-        private int[] zi_hight;
+        private bool[] b_zi = {false, false, false, false, false, false, false, false };
+        private int[] w= {0,0,0,0,0,0,0,0 };
+        private int[] h= { 0, 0, 0, 0, 0, 0, 0, 0 };
         private RectangleF r_Zi = new RectangleF(1015, 158, 50, 50);
 
 
@@ -54,6 +59,14 @@ namespace NoClose {
         private Image im_agree;
         private Image im_disagree;
         private Image im_ALi;
+        private Image im_ALi_chat0;
+        private Image im_ALi_chat1;
+        private Image im_ALi_chatno;
+        private Image im_Taozi_chatno;
+        private Image im_Taozi_chatxing;
+
+
+        private Image im_zi_0;
         private Image im_zi_1;
         private Image im_zi_2;
         private Image im_zi_3;
@@ -76,7 +89,7 @@ namespace NoClose {
         public Form1() {
             InitializeComponent();
             //采用双缓冲技术的控件必需的设置
-            //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
             //监听
             FormClosing += new FormClosingEventHandler(form1_FormClosed);
             //Paint += new PaintEventHandler(Form1_Paint);
@@ -84,13 +97,45 @@ namespace NoClose {
             MouseDown += new MouseEventHandler(Form1_MouseDown);
             MouseUp += new MouseEventHandler(Form1_MouseUp);
             MouseMove += new MouseEventHandler(Form1_MouseMove);
+            pictureBox1.MouseMove+= new MouseEventHandler(Form1_MouseMove);
+            pictureBox1.Image= Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
             Init_Image();
 
+            
         }
 
         private void Init_Image() {
             im_bg = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png");
-            MyImage.Add("im_bg", Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png"));
+            im_bg1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
+            im_bgWin = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\bg_window.png");
+            im_agree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
+            im_disagree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
+
+            im_ALi = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\ALi.png");
+            im_ALi_chat0 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_ali0.png");
+            im_ALi_chat1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_ali_2.png");
+            im_ALi_chatno = im_ALi_chat0;// Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_ali_no.png");
+            im_Taozi_chatno = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_tao_no.png");
+            im_Taozi_chatxing = im_ALi_chat0;// Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_tao_xing.png");
+
+            im_zi_0 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
+            im_zi_1 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
+            im_zi_2 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
+            im_zi_3 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
+            im_zi_4 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_4.png");
+            im_zi_5 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_5.png");
+            im_zi_6 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_6.png");
+            im_zi_7 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_7.png");
+            im_zi_8 = im_zi_0;//mage.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_8.png");
+            //2       im_zi_0;//
+            im_zi_11 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_11.png");
+            im_zi_12 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_12.png");
+            im_zi_13 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_13.png");
+            im_zi_14 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_14.png");
+            im_zi_15 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_15.png");
+            im_zi_16 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_16.png");
+            im_zi_17 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_17.png");
+            im_zi_18 =im_zi_0;//Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_18.png");
         }
 
         private void Form1_Paint2(object sender, PaintEventArgs e) {
@@ -126,40 +171,162 @@ namespace NoClose {
         //    //Form1_Paint();
 
         //}
-        public void DrawLine() {
-            Graphics gs = pictureBox1.CreateGraphics();
-            SolidBrush brush_1 = new SolidBrush(Color.Red);
-            Pen pen1 = new Pen(brush_1, 10);
-            gs.DrawLine(pen1, new Point(10, 50), new Point(50, 50));
-            im_disagree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
+        public void DrawControl() {
+            Thread.Sleep(100);
+            b_zi[0] = true;
+            Thread.Sleep(100);
+            b_zi[1] = true;
+            Thread.Sleep(100);
+            b_zi[2] = true;
+        }
+        Graphics gs;// = CreateGraphics();
+        public void Draw1() {
+            gs = pictureBox1.CreateGraphics();
             while (true) {
+                while (isZi) {
+                    //背景
+                    gs.DrawImage(im_zi_1, new Rectangle(zi_x[0], zi_y[0], w[0], h[0]));
+                    gs.DrawImage(im_zi_2, new Rectangle(zi_x[1], zi_y[1], w[1], h[1]));
+                    gs.DrawImage(im_zi_3, new Rectangle(zi_x[2], zi_y[2], w[2], h[2]));
+                    gs.DrawImage(im_zi_4, new Rectangle(zi_x[3], zi_y[3], w[3], h[3]));
+                    gs.DrawImage(im_zi_5, new Rectangle(zi_x[4], zi_y[4], w[4], h[4]));
+                    gs.DrawImage(im_zi_6, new Rectangle(zi_x[5], zi_y[5], w[5], h[5]));
+                    gs.DrawImage(im_zi_7, new Rectangle(zi_x[6], zi_y[6], w[6], h[6]));
+                    gs.DrawImage(im_zi_8, new Rectangle(zi_x[7], zi_y[7], w[7], h[7]));
+                }
                 while (isALi) {
-                    Thread.Sleep(1000);
-                    while (true) {
-                        gs.DrawImage(im_disagree, r_disagree);
-                    }
+                    gs.DrawImage(im_ALi, r_ALi);
+                    //gs.DrawImage(im_ALi_chat1, r_ALi_chat);
+                    gs.DrawImage(im_ALi_chatno, r_ALi_chat);
+                    gs.DrawImage(im_Taozi_chatxing, r_Tao_chat);
                 }
             }
-        }
-        public void DrawLine1() {
-            Graphics gs = pictureBox1.CreateGraphics();
-            SolidBrush brush_1 = new SolidBrush(Color.Red);
-            Pen pen1 = new Pen(brush_1, 10);
-            gs.DrawLine(pen1, new Point(50, 50), new Point(100, 100));
-            im_agree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
             
+        }
+        public void Draw2() {
+            DateTime current = DateTime.Now;
+            im_zi_1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_1.png");
+            while (current.AddMilliseconds(time_zi) > DateTime.Now) {
+                if (w[0] < 50) {
+                    Thread.Sleep(1);
+                    w[0] = w[0] + 1;
+                    h[0] = h[0] + 1;
+                }
+            }
+            //Thread.Sleep(time_zi);
+            
+            //Thread.Sleep(time_zi);
+            im_zi_2 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_2.png");
+            while (current.AddMilliseconds(time_zi*2) > DateTime.Now) {
+                if (w[1] < 50) {
+                    Thread.Sleep(1);
+                    w[1] = w[1] + 1;
+                    h[1] = h[1] + 1;
+                }
+            }
+            im_zi_3 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_3.png");
+            while (current.AddMilliseconds(time_zi * 3) > DateTime.Now) {
+                if (w[2] < 50) {
+                    Thread.Sleep(1);
+                    w[2] = w[2] + 1;
+                    h[2] = h[2] + 1;
+                }
+            }
+            im_zi_4 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_4.png");
+            while (current.AddMilliseconds(time_zi * 4) > DateTime.Now) {
+                if (w[3] < 50) {
+                    Thread.Sleep(1);
+                    w[3] = w[3] + 1;
+                    h[3] = h[3] + 1;
+                }
+            }
+            w[4] = 50;
+            h[4] = 50;
+            im_zi_5 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_5.png");
+            //while (current.AddMilliseconds(time_zi * 5) > DateTime.Now) {
+            //    if (w[4] < 50) {
+            //        Thread.Sleep(1);
+            //        w[4] = w[4] + 1;
+            //        h[4] = h[4] + 1;
+            //    }
+            //}
+            Thread.Sleep(time_zi);
+            im_zi_6 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_6.png");
+            while (current.AddMilliseconds(time_zi * 6) > DateTime.Now) {
+                if (w[5] < 50) {
+                    //Thread.Sleep(1);
+                    //w[5] = w[2] + 1;
+                    //h[5] = h[2] + 1;
+                    w[5] = 50;
+                    h[5] = 50;
+                }
+            }
+            im_zi_7 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_7.png");
+            im_zi_8 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_8.png");
+            while (current.AddMilliseconds(time_zi * 7) > DateTime.Now) {
+                if (w[6] < 50) {
+                    //Thread.Sleep(1);
+                    w[6] = 50;//6] + 1;
+                    h[6] = 50;//h[6] + 1;
+                    w[7] = 50;//6] + 1;
+                    h[7] = 50;//h[6] + 1;
+                }
+            }
+            im_zi_1 = im_zi_0;
+            im_zi_2 = im_zi_0;
+            im_zi_3 = im_zi_0;
+            im_zi_4 = im_zi_0;
+            im_zi_5 = im_zi_0;
+            im_zi_6 = im_zi_0;
+            im_zi_7 = im_zi_0;
+            im_zi_8 = im_zi_0;
+            isZi = false;
+            Thread.Sleep(1000);
+            
+            pictureBox1.Image= Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
+            gs.Clear(this.BackColor);
+            //gs.Dispose();
+            //gs = pictureBox1.CreateGraphics();
+            isZi = true;
+            Thread.Sleep(time_zi);
+            im_zi_1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_11.png");
+            Thread.Sleep(time_zi);
+            im_zi_2 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_12.png");
+            Thread.Sleep(time_zi);
+            im_zi_3 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_13.png");
+            Thread.Sleep(time_zi);
+            im_zi_4 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_14.png");
+            Thread.Sleep(time_zi);
+            im_zi_5 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_15.png");
+            Thread.Sleep(time_zi);
+            im_zi_6 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_16.png");
+            Thread.Sleep(time_zi);
+            im_zi_7 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_17.png");
+            Thread.Sleep(time_zi);
+            im_zi_8 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_18.png");
+            isZi = false;
+            Thread.Sleep(1000);
+            pictureBox1.Image = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
+            gs.Clear(this.BackColor);
+            isALi = true;
+            Thread.Sleep(500);
+            im_ALi_chatno = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_ali_no.png");
+            Thread.Sleep(3000);
+            im_Taozi_chatxing = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_tao_xing.png");
+            Thread.Sleep(1000);
+        }
+        public void Draw3() {
+            Graphics gs = this.CreateGraphics();
+            Thread.Sleep(2000);
             while (true) {
-                gs.DrawImage(im_agree, r_agree);
                 
+                gs.DrawImage(im_zi_3, new Rectangle(zi_x[2], zi_y[2], 50, 50));
             }
         }
         private void button1_Click(object sender, EventArgs e) {
             //Thread thread = new Thread(new ThreadStart(DrawLine));
             //thread.Start();
-            Thread thread1 = new Thread(new ThreadStart(DrawLine1));
-            thread1.Start();
-            Thread thread = new Thread(new ThreadStart(DrawLine));
-            thread.Start();
+            
             isALi = true;
 
         }
@@ -168,42 +335,43 @@ namespace NoClose {
         //private void Form1_Paint() {
             
             g2 = this.CreateGraphics();
-            im_bg = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png");
+            //im_bg = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png");
             im_bg1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
-            im_bgWin = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\bg_window.png");
-            im_agree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
-            im_disagree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
+            //im_bgWin = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\bg_window.png");
+            //im_agree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
+            //im_disagree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
 
-            im_ALi = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\ALi.png");
+            //im_ALi = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\ALi.png");
 
-            im_zi_1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_1.png");
-            im_zi_2 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_2.png");
-            im_zi_3 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_3.png");
-            im_zi_4 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_4.png");
-            im_zi_5 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_5.png");
-            im_zi_6 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_6.png");
-            im_zi_7 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_7.png");
-            im_zi_8 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_8.png");
-            //2
-            im_zi_11 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_11.png");
-            im_zi_12 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_12.png");
-            im_zi_13 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_13.png");
-            im_zi_14 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_14.png");
-            im_zi_15 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_15.png");
-            im_zi_16 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_16.png");
-            im_zi_17 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_17.png");
-            im_zi_18 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_18.png");
+            //im_zi_0 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
+            //im_zi_1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_1.png");
+            //im_zi_2 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_2.png");
+            //im_zi_3 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_3.png");
+            //im_zi_4 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_4.png");
+            //im_zi_5 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_5.png");
+            //im_zi_6 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_6.png");
+            //im_zi_7 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_7.png");
+            //im_zi_8 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_8.png");
+            ////2
+            //im_zi_11 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_11.png");
+            //im_zi_12 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_12.png");
+            //im_zi_13 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_13.png");
+            //im_zi_14 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_14.png");
+            //im_zi_15 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_15.png");
+            //im_zi_16 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_16.png");
+            //im_zi_17 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_17.png");
+            //im_zi_18 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_18.png");
 
             //g.DrawImage(im_ALi, r_ALi);
             g2.DrawImage(im_bg1, r_bg);
-            g2.DrawImage(im_bg, r_bg);
+            //g2.DrawImage(im_bg, r_bg);
             g2.Dispose();
 
-            Delay(10);
+            //Delay(10);
             
-            g = this.CreateGraphics();
-            g.DrawImage(im_agree, r_agree);
-            g.Dispose();
+            //g = this.CreateGraphics();
+            //g.DrawImage(im_agree, r_agree);
+            //g.Dispose();
             //Thread cg = new Thread(new ThreadStart(PlayCg));
             //cg.Start();
         }
@@ -243,7 +411,7 @@ namespace NoClose {
             //g.DrawImage(im_zi_17, new Rectangle(zi_x[6], zi_y[6], 50, 50));
             //Thread.Sleep(zi_time);
             //g.DrawImage(im_zi_18, new Rectangle(zi_x[7], zi_y[7], 50, 50));
-            //Thread.Sleep(1000);
+            //Thread.Sleep(time_zi);
             //g.DrawImage(im_bgWin, r_bg);
             //g.DrawImage(im_ALi, r_ALi);
             g.Dispose();
@@ -251,17 +419,37 @@ namespace NoClose {
 
         bool isMove = false;
         private void Form1_MouseDown(object sender, MouseEventArgs e) {
-            isMove = true;
+            Thread thread = new Thread(new ThreadStart(DrawControl));
+            thread.Start();
+
+
+            Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
+            t_Draw1.Start();
+            Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
+            t_Draw2.Start();
+            //Thread t_Draw3 = new Thread(new ThreadStart(Draw3));
+            //t_Draw3.Start();
         }
         private void Form1_MouseUp(object sender, MouseEventArgs e) {
             isMove = false;
         }
         private void Form1_MouseMove(object sender, MouseEventArgs e) {
-            if (isMove) {
-                r_Zi = new RectangleF(e.X, e.Y, 50, 50);
+            if (true) {
+                //r_Tao_chat = new RectangleF(e.X, e.Y, 300,100);
             }
-            button1.Text = e.X+","+e.Y;
+            btn_agree.Text = e.X+","+e.Y;
             //r2 = new RectangleF(e.X,e.Y,100,100);
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e) {
+            Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
+            t_Draw1.Start();
+            Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
+            t_Draw2.Start();
+        }
+
+        private void btn_disagree_Click(object sender, EventArgs e) {
+
         }
     }
 }
