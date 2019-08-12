@@ -40,6 +40,10 @@ namespace NoClose {
         private RectangleF r_Zi = new RectangleF(1015, 158, 50, 50);
 
 
+        private Dictionary<string, Image> MyImage = new Dictionary<string, Image>();
+        private Dictionary<string, RectangleF> MyRecet = new Dictionary<string, RectangleF>();
+
+
 
         //绘图变
         private Graphics g;
@@ -80,7 +84,13 @@ namespace NoClose {
             MouseDown += new MouseEventHandler(Form1_MouseDown);
             MouseUp += new MouseEventHandler(Form1_MouseUp);
             MouseMove += new MouseEventHandler(Form1_MouseMove);
+            Init_Image();
 
+        }
+
+        private void Init_Image() {
+            im_bg = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png");
+            MyImage.Add("im_bg", Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png"));
         }
 
         private void Form1_Paint2(object sender, PaintEventArgs e) {
