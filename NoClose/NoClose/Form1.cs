@@ -25,9 +25,10 @@ namespace NoClose {
 
         //}
         //控制
-        private bool isOver=false;
-        private bool isZi=true;
-        private bool isALi=false;
+        private bool isOver=false;  //重启
+        private bool isZi=true;     //cg字
+        private bool isALi=false;   //cg阿狸
+        private bool isBegin=false; //第一次点击
         private int time_zi=100;
         //范围
         private RectangleF r_bg = new RectangleF(0, 0, 1366f, 768f);
@@ -96,8 +97,9 @@ namespace NoClose {
             //Paint += new PaintEventHandler(Form1_Paint2);
             MouseDown += new MouseEventHandler(Form1_MouseDown);
             MouseUp += new MouseEventHandler(Form1_MouseUp);
-            MouseMove += new MouseEventHandler(Form1_MouseMove);
+            //MouseMove += new MouseEventHandler(Form1_MouseMove);
             pictureBox1.MouseMove+= new MouseEventHandler(Form1_MouseMove);
+            btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove);
             pictureBox1.Image= Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
             Init_Image();
 
@@ -315,14 +317,7 @@ namespace NoClose {
             im_Taozi_chatxing = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\chat\chat_tao_xing.png");
             Thread.Sleep(1000);
         }
-        public void Draw3() {
-            Graphics gs = this.CreateGraphics();
-            Thread.Sleep(2000);
-            while (true) {
-                
-                gs.DrawImage(im_zi_3, new Rectangle(zi_x[2], zi_y[2], 50, 50));
-            }
-        }
+
         private void button1_Click(object sender, EventArgs e) {
             //Thread thread = new Thread(new ThreadStart(DrawLine));
             //thread.Start();
@@ -331,50 +326,6 @@ namespace NoClose {
 
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e) {
-        //private void Form1_Paint() {
-            
-            g2 = this.CreateGraphics();
-            //im_bg = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background2.png");
-            im_bg1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\background1.jpg");
-            //im_bgWin = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\bg\bg_window.png");
-            //im_agree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
-            //im_disagree = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\agree_big.png");
-
-            //im_ALi = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\ALi.png");
-
-            //im_zi_0 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_0.png");
-            //im_zi_1 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_1.png");
-            //im_zi_2 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_2.png");
-            //im_zi_3 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_3.png");
-            //im_zi_4 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_4.png");
-            //im_zi_5 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_5.png");
-            //im_zi_6 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_6.png");
-            //im_zi_7 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_7.png");
-            //im_zi_8 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_8.png");
-            ////2
-            //im_zi_11 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_11.png");
-            //im_zi_12 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_12.png");
-            //im_zi_13 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_13.png");
-            //im_zi_14 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_14.png");
-            //im_zi_15 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_15.png");
-            //im_zi_16 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_16.png");
-            //im_zi_17 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_17.png");
-            //im_zi_18 = Image.FromFile(@"F:\邀请函\Invite\NoClose\NoClose\Properties\zi\zi_18.png");
-
-            //g.DrawImage(im_ALi, r_ALi);
-            g2.DrawImage(im_bg1, r_bg);
-            //g2.DrawImage(im_bg, r_bg);
-            g2.Dispose();
-
-            //Delay(10);
-            
-            //g = this.CreateGraphics();
-            //g.DrawImage(im_agree, r_agree);
-            //g.Dispose();
-            //Thread cg = new Thread(new ThreadStart(PlayCg));
-            //cg.Start();
-        }
 
         public static void Delay(int mm) {
             DateTime current = DateTime.Now;
@@ -383,69 +334,41 @@ namespace NoClose {
             }
             return;
         }
-        int zi_time = 50;
-        private void PlayCg() {
-            g = this.CreateGraphics();
-            g.DrawImage(im_zi_1, new Rectangle(zi_x[0], zi_y[0], 50, 50));
-            g.DrawImage(im_zi_2, new Rectangle(zi_x[1], zi_y[1], 50, 50));
-            g.DrawImage(im_zi_3, new Rectangle(zi_x[2], zi_y[2], 50, 50));
-            g.DrawImage(im_zi_4, new Rectangle(zi_x[3], zi_y[3], 50, 50));
-            g.DrawImage(im_zi_5, new Rectangle(zi_x[4], zi_y[4], 50, 50));
-            g.DrawImage(im_zi_6, new Rectangle(zi_x[5], zi_y[5], 50, 50));
-            g.DrawImage(im_zi_7, new Rectangle(zi_x[6], zi_y[6], 50, 50));
-            g.DrawImage(im_zi_8, new Rectangle(zi_x[7], zi_y[7], 50, 50));
 
-            //g.DrawImage(im_bgWin,r_bg);
-            //g.DrawImage(im_zi_11, new Rectangle(zi_x[0], zi_y[0], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_12, new Rectangle(zi_x[1], zi_y[1], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_13, new Rectangle(zi_x[2], zi_y[2], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_14, new Rectangle(zi_x[3], zi_y[3], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_15, new Rectangle(zi_x[4], zi_y[4], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_16, new Rectangle(zi_x[5], zi_y[5], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_17, new Rectangle(zi_x[6], zi_y[6], 50, 50));
-            //Thread.Sleep(zi_time);
-            //g.DrawImage(im_zi_18, new Rectangle(zi_x[7], zi_y[7], 50, 50));
-            //Thread.Sleep(time_zi);
-            //g.DrawImage(im_bgWin, r_bg);
-            //g.DrawImage(im_ALi, r_ALi);
-            g.Dispose();
-        }
-
-        bool isMove = false;
         private void Form1_MouseDown(object sender, MouseEventArgs e) {
-            Thread thread = new Thread(new ThreadStart(DrawControl));
-            thread.Start();
 
-
-            Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
-            t_Draw1.Start();
-            Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
-            t_Draw2.Start();
-            //Thread t_Draw3 = new Thread(new ThreadStart(Draw3));
-            //t_Draw3.Start();
         }
         private void Form1_MouseUp(object sender, MouseEventArgs e) {
-            isMove = false;
+
         }
         private void Form1_MouseMove(object sender, MouseEventArgs e) {
             if (true) {
                 //r_Tao_chat = new RectangleF(e.X, e.Y, 300,100);
             }
             btn_agree.Text = e.X+","+e.Y;
-            //r2 = new RectangleF(e.X,e.Y,100,100);
+        }
+        private void BtnDisagree_MouseMove(object sender, MouseEventArgs e) {
+            Random random = new Random();
+            int x = random.Next(1, 1266);
+            int y = random.Next(1, 668);
+            btn_disagree.Location = new Point(x, y);
+        }
+        private int[] MouseNewPos() {
+            Random random = new Random();
+            int x = random.Next(1, 1266);
+            int y = random.Next(1, 668);
+            return new int[]{ x,y};
         }
 
         private void pictureBox1_Click(object sender, EventArgs e) {
-            Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
-            t_Draw1.Start();
-            Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
-            t_Draw2.Start();
+            if (!isBegin) {
+                isBegin = true;
+                Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
+                t_Draw1.Start();
+                Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
+                t_Draw2.Start();
+            }
+            
         }
 
         private void btn_disagree_Click(object sender, EventArgs e) {
