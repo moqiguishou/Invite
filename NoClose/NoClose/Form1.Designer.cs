@@ -37,7 +37,8 @@ namespace NoClose {
             // btn_disagree
             // 
             this.btn_disagree.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btn_disagree.Location = new System.Drawing.Point(242, 399);
+            this.btn_disagree.Image = global::NoClose.Properties.Resources.dis_agree;
+            this.btn_disagree.Location = new System.Drawing.Point(521, 352);
             this.btn_disagree.Name = "btn_disagree";
             this.btn_disagree.Size = new System.Drawing.Size(100, 100);
             this.btn_disagree.TabIndex = 9;
@@ -47,12 +48,13 @@ namespace NoClose {
             // btn_agree
             // 
             this.btn_agree.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btn_agree.Location = new System.Drawing.Point(411, 399);
+            this.btn_agree.Image = global::NoClose.Properties.Resources.agree_big;
+            this.btn_agree.Location = new System.Drawing.Point(884, 352);
             this.btn_agree.Name = "btn_agree";
             this.btn_agree.Size = new System.Drawing.Size(100, 100);
             this.btn_agree.TabIndex = 0;
             this.btn_agree.UseVisualStyleBackColor = true;
-            this.btn_agree.Click += new System.EventHandler(this.button1_Click);
+            //this.btn_agree.Click += new System.EventHandler(this.button1_Click);
             // 
             // pictureBox1
             // 
@@ -61,15 +63,13 @@ namespace NoClose {
             this.pictureBox1.Size = new System.Drawing.Size(1366, 768);
             this.pictureBox1.TabIndex = 8;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // txt_PM
             // 
-            this.txt_PM.Location = new System.Drawing.Point(295, 463);
+            this.txt_PM.Location = new System.Drawing.Point(411, 639);
             this.txt_PM.Name = "txt_PM";
             this.txt_PM.Size = new System.Drawing.Size(447, 21);
             this.txt_PM.TabIndex = 10;
-            this.txt_PM.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // lab_mes
             // 
