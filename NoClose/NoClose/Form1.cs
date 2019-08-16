@@ -22,10 +22,11 @@ namespace NoClose {
         //        cp.ExStyle |= 0x02000000;
         //        return cp;
         //    }
-
+        //不让点不同意监听，btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove)
         //}
         //控制
         private bool isOver = false;  //重启
+        private bool isHuang = false;  //同意晃动
         private bool isAgree = false;  //是否答应
         private bool isPlayagreecg = false;  //是否答应
         private bool isCGOver = false;  //cg结束
@@ -87,7 +88,7 @@ namespace NoClose {
         //run
         private Image[] im_runL = new Image[5];
         private Image[] im_runR = new Image[5];
-        private Image[] im_Agree = new Image[18];
+        private Image[] im_Agree = new Image[19];
         //private List<Image> im_zi;
 
         //路径
@@ -116,7 +117,7 @@ namespace NoClose {
             //lab_mes.Text = "LastTime:"+ sLasttime + " 时间差：" + cha + "; " + nowTime.ToString();
             showMes("LastTime:" + sLasttime + " 时间差：" + cha + "; " + nowTime.ToString());
             txt_PM.Hide();
-            if (cha > 20) {
+            if (cha > 50) {
                 isFirst = true;
                 //背景图设置
                 pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");//Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
@@ -199,6 +200,7 @@ namespace NoClose {
             im_Agree[15] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_16.png");
             im_Agree[16] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_17.png");
             im_Agree[17] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_18.png");
+            im_Agree[18] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_19.png");
 
         }
 
@@ -206,6 +208,8 @@ namespace NoClose {
             MyIni.WriteIniData("Time", "Last", nNowTime.ToString(), Path_Ini);
             if (!isOver) {
                 reStart();
+            } else {
+                System.Environment.Exit(0);
             }
         }
         //无限循环
@@ -247,33 +251,33 @@ namespace NoClose {
             im_zi_1 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_1.png");
             while (current.AddMilliseconds(time_zi) > DateTime.Now) {
                 if (w[0] < 50) {
-                    Thread.Sleep(1);
-                    w[0] = w[0] + 1;
-                    h[0] = h[0] + 1;
+                    //Thread.Sleep(1);
+                    w[0] = 50;
+                    h[0] = 50;
                 }
             }
             im_zi_2 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_2.png");
             while (current.AddMilliseconds(time_zi*2) > DateTime.Now) {
                 if (w[1] < 50) {
-                    Thread.Sleep(1);
-                    w[1] = w[1] + 1;
-                    h[1] = h[1] + 1;
+                    //Thread.Sleep(1);
+                    w[1] = 50;
+                    h[1] = 50;
                 }
             }
             im_zi_3 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_3.png");
             while (current.AddMilliseconds(time_zi * 3) > DateTime.Now) {
                 if (w[2] < 50) {
-                    Thread.Sleep(1);
-                    w[2] = w[2] + 1;
-                    h[2] = h[2] + 1;
+                    //Thread.Sleep(1);
+                    w[2] = 50;
+                    h[2] = 50;
                 }
             }
             im_zi_4 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_4.png");
             while (current.AddMilliseconds(time_zi * 4) > DateTime.Now) {
                 if (w[3] < 50) {
-                    Thread.Sleep(1);
-                    w[3] = w[3] + 1;
-                    h[3] = h[3] + 1;
+                    //Thread.Sleep(1);
+                    w[3] = 50;
+                    h[3] = 50;
                 }
             }
             w[4] = 50;
@@ -400,11 +404,17 @@ namespace NoClose {
             //    return;
             //}
 
-            private void Form1_MouseMove(object sender, MouseEventArgs e) {
+         private void Form1_MouseMove(object sender, MouseEventArgs e) {
             if (true) {
                 //r_Tao_chat = new RectangleF(e.X, e.Y, 300,100);
             }
-        }
+         }
+        /// <summary>
+        /// 鼠标一经过就随机生成一个位置
+        /// 前面要btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnDisagree_MouseMove(object sender, MouseEventArgs e) {
             if (!isDisRun) {
                 Random random = new Random();
@@ -429,6 +439,7 @@ namespace NoClose {
             if (isBegin && isCGOver && e.X >= 1015 && e.X <= 1215 && e.Y >= 158 && e.Y <= 438) {
                 //点中Ali
                 txt_PM.Show();
+                txt_PM.Text = "name";
             } else {
                 txt_PM.Hide();
             }
@@ -465,7 +476,8 @@ namespace NoClose {
                         //lab_mes.Text = "小灰兔子不再乱跑了";
                         //showMes("好吧，那你有空的话再来哦，可以直接关掉了");
                         isOver = true;
-                        this.Close();
+                        System.Environment.Exit(0);
+                        //this.Close();
                     }
                 }
             }
