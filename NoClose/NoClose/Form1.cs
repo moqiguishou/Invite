@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Threading;
+using System.Net;
+using System.Net.Sockets;
 
 namespace NoClose {
     public partial class Form1 : Form {
@@ -42,6 +44,8 @@ namespace NoClose {
         private int nLastTime = 0;
         private int nNowTime = 0;
 
+        private int numIndex = 5;
+
         private string[] exitPM = {
             "Nizw",
             "Nzw",
@@ -52,6 +56,7 @@ namespace NoClose {
             "ani",
             "sumi",
             "sly",
+            "苏亚玲",
         };
         private string[] exit2PM = {
             "shutdown",
@@ -103,9 +108,16 @@ namespace NoClose {
             "如果你知道特殊的命令，那你就能直接出去了",
             "好期待~",
         };
+        //Client
+        private bool isClientRun = true;
+        private bool isClientFlash = false;
+        private IPEndPoint ipe;
+        private Socket client_socket;
+        private string resiveMesg = "";
 
         public Form1() {
             InitializeComponent();
+            ClientInit();
             PathInit();
             string sLasttime = MyIni.ReadIniData("Time", "Last", "0", Path_Ini);
             int.TryParse(sLasttime, out nLastTime);
@@ -115,7 +127,7 @@ namespace NoClose {
             var nowTime = new DateTime(1970, 1, 1, 8, 0, 0).AddSeconds(cha);//时间戳转时间
             //lab_mes.Text = nLastTime + "; " + nNowTime+"; "+ nowTime.ToString();
             //lab_mes.Text = "LastTime:"+ sLasttime + " 时间差：" + cha + "; " + nowTime.ToString();
-            showMes("LastTime:" + sLasttime + " 时间差：" + cha + "; " + nowTime.ToString());
+            //showMes("LastTime:" + sLasttime + " 时间差：" + cha + "; " + nowTime.ToString());
             txt_PM.Hide();
             if (cha > 50) {
                 isFirst = true;
@@ -124,6 +136,7 @@ namespace NoClose {
                 btn_disagree.Hide();
                 btn_agree.Hide();
             } else {
+                isCGOver = true;
                 showMes(donotit);
                 isFirst = false;
                 pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChat_2.png");//Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
@@ -132,13 +145,13 @@ namespace NoClose {
                 isBegin = true;
             }
 
-            
-            
+
+
             ////采用双缓冲技术的控件必需的设置
             //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
             //监听
             FormClosing += new FormClosingEventHandler(form1_FormClosed);       //重启监听
-            pictureBox1.MouseMove+= new MouseEventHandler(Form1_MouseMove);     //画面点击
+            pictureBox1.MouseMove += new MouseEventHandler(Form1_MouseMove);     //画面点击
             pictureBox1.MouseDown += new MouseEventHandler(pictureBox1_MouseDown);//鼠标移动
             btn_agree.MouseUp += new MouseEventHandler(Btnagree_MouseUp);
             btn_agree.MouseDown += new MouseEventHandler(Btnagree_MouseDown);
@@ -150,6 +163,48 @@ namespace NoClose {
             Thread mesThread = new Thread(Mes);
             mesThread.Start();
         }
+
+        private void ClientInit() {
+            string ipStr = "192.168.46.182";// "127.0.0.1";
+            int port = 8888;
+            IPAddress ip = IPAddress.Parse(ipStr);
+            ipe = new IPEndPoint(ip, port);
+            //Thread mythread = new Thread(MyThread_showMesg);
+            //mythread.Start();
+            //创建客户端socket
+            client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //连接服务器
+            try {
+                client_socket.Connect(ipe);
+                Thread thread = new Thread(MyThread_recive);
+                thread.Start();
+            } catch (Exception) {
+
+            }
+        }
+
+        private void MyThread_recive() {
+            while (isClientRun) {
+                try {
+                    //接收消息
+                    string recStr = "";
+                    byte[] recBytes = new byte[1024];
+                    int bytes = client_socket.Receive(recBytes, recBytes.Length, 0);
+                    recStr += Encoding.Unicode.GetString(recBytes, 0, bytes);
+                    resiveMesg = recStr;// "From Server messages: {0}" + recStr;
+                    isClientFlash = true;
+                    Thread.Sleep(50);
+                    showMes(resiveMesg);
+                } catch (Exception) {
+
+                }
+            }
+        }
+
+        //private void MyThread_showMesg() {
+        //    throw new NotImplementedException();
+        //}
+
         /// <summary>
         /// 路径获取
         /// </summary>
@@ -214,6 +269,7 @@ namespace NoClose {
         }
         //无限循环
         private void reStart() {
+            Client_SendMesg("1:重启");
             ProcessStartInfo startInfo = new ProcessStartInfo {
                 FileName = "wscript.exe",
                 //Arguments = @"..\reStart.vbs"
@@ -366,6 +422,7 @@ namespace NoClose {
         }
 
         private void Btnagree_MouseDown(object sender, MouseEventArgs e) {
+            Client_SendMesg("6:同意");
             isOver = true;
             if (!isAgree) {
                 btn_agree.Size = new Size(80, 80);
@@ -417,10 +474,17 @@ namespace NoClose {
         /// <param name="e"></param>
         private void BtnDisagree_MouseMove(object sender, MouseEventArgs e) {
             if (!isDisRun) {
+                Client_SendMesg("2:鼠标瞬移");
+                numIndex = numIndex - 1;
                 Random random = new Random();
                 int x = random.Next(1, 1266);
                 int y = random.Next(1, 668);
                 btn_disagree.Location = new Point(x, y);
+                if (numIndex <= 0) {
+                    txt_PM.Show();
+                    txt_PM.Text = "请输入名字";
+                    showMes("实在想抓住他的话，也是可以输入命令的");
+                }
             }
         }
 
@@ -439,13 +503,14 @@ namespace NoClose {
             if (isBegin && isCGOver && e.X >= 1015 && e.X <= 1215 && e.Y >= 158 && e.Y <= 438) {
                 //点中Ali
                 txt_PM.Show();
-                txt_PM.Text = "name";
+                txt_PM.Text = "请输入名字";
             } else {
                 txt_PM.Hide();
             }
         }
 
         private void btn_disagree_Click(object sender, EventArgs e) {
+            Client_SendMesg("5:不同意");
             isOver = true;
             showMes(new string[] { "要哭了哦","周末开心" });
         }
@@ -461,6 +526,7 @@ namespace NoClose {
                 string strPM = txt_PM.Text.ToLower();
                 for (int i = 0; i < exitPM.Length; i++) {
                     if (exitPM[i].ToLower().Equals(strPM)) {
+                        Client_SendMesg("3:停止瞬移");
                         //lab_mes.Text = "小灰兔子不再乱跑了";
                         showMes("小灰兔子不再乱跑了");
                         isDisRun = true;
@@ -475,6 +541,7 @@ namespace NoClose {
                     if (exit2PM[i].ToLower().Equals(strPM)) {
                         //lab_mes.Text = "小灰兔子不再乱跑了";
                         //showMes("好吧，那你有空的话再来哦，可以直接关掉了");
+                        Client_SendMesg("4:直接退出");
                         isOver = true;
                         System.Environment.Exit(0);
                         //this.Close();
@@ -611,10 +678,36 @@ namespace NoClose {
         private void Mes() {
             while (true) {
                 while (isShowMes) {
-                    Thread.Sleep(2000);
+                    //Thread.Sleep(2000);
+                    if (isClientFlash) {
+                        Thread.Sleep(3000);
+                    } else {
+                        DateTime current = DateTime.Now;
+                        while (current.AddMilliseconds(3000) > DateTime.Now) {
+                            if (isClientFlash) {
+                                break;
+                            }
+                        }
+                    }
                     lab_mes.Text = "";
                     isShowMes = false;
+                    isClientFlash = false;
                 }
+            }
+        }
+
+        private void Client_SendMesg(string str) {
+            //发送消息
+            string sendStr = str;
+            byte[] sendBytes = Encoding.ASCII.GetBytes(sendStr);
+            client_socket.Close();
+
+            try {
+                client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                client_socket.Connect(ipe);
+                client_socket.Send(sendBytes);
+            } catch (Exception) {
+                //textBox1.Text = "Failure";
             }
         }
     }

@@ -54,7 +54,6 @@ namespace NoClose {
             this.btn_agree.Size = new System.Drawing.Size(100, 100);
             this.btn_agree.TabIndex = 0;
             this.btn_agree.UseVisualStyleBackColor = true;
-            //this.btn_agree.Click += new System.EventHandler(this.button1_Click);
             // 
             // pictureBox1
             // 
@@ -66,9 +65,10 @@ namespace NoClose {
             // 
             // txt_PM
             // 
+            this.txt_PM.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.txt_PM.Location = new System.Drawing.Point(411, 639);
             this.txt_PM.Name = "txt_PM";
-            this.txt_PM.Size = new System.Drawing.Size(447, 21);
+            this.txt_PM.Size = new System.Drawing.Size(447, 29);
             this.txt_PM.TabIndex = 10;
             // 
             // lab_mes

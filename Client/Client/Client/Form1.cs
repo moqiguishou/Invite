@@ -85,7 +85,7 @@ namespace Client {
                     label1.Text = resiveMesg;
                     Thread.Sleep(5000);
                     label1.Text = "";
-                    resiveMesg = "";
+                    resiveMesg = "555";
                     isShow = false;
                 }
             }

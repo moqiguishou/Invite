@@ -14,10 +14,13 @@ namespace Server2 {
         private static Socket client_socket;
         private static Socket server_socket;
         private static bool isRun = true;
+        private static string path = @"E:\邀请函\Invite\Client\Server2\Server2\ini.ini";
         static void Main(string[] args) {
+            //ini init
+            iniInit();
             //配置端口
             int port = 8888;//端口
-            string ipStr = "127.0.0.1";
+            string ipStr = "192.168.46.182";//"127.0.0.1";
             IPAddress ip = IPAddress.Parse(ipStr);
             IPEndPoint ipe = new IPEndPoint(ip, port);
             //创建socket
@@ -44,6 +47,16 @@ namespace Server2 {
             }
         }
 
+        private static void iniInit() {
+            Myini.WriteIniData("First", "result", "0", path);
+            Myini.WriteIniData("JianTing", "ReStart", "0", path);
+            Myini.WriteIniData("JianTing", "Flash", "0", path);
+            Myini.WriteIniData("JianTing", "Stop", "0", path);
+            Myini.WriteIniData("JianTing", "Exit", "0", path);
+            Myini.WriteIniData("JianTing", "DisAgree", "0", path);
+            Myini.WriteIniData("JianTing", "Agree", "0", path);
+        }
+
         private static void Mythread() {
             while (isRun) {
                 try {
@@ -55,6 +68,33 @@ namespace Server2 {
                     int bytes = client_socket.Receive(recbyte, recbyte.Length, 0);//字节流 
                     name += Encoding.ASCII.GetString(recbyte, 0, bytes);          //--> 字符流
                     Console.WriteLine("====={0} 连接成功=====", name);
+                    if (name.Substring(0,1).Equals("1")) {
+                        Myini.ADDIniData("JianTing", "ReStart",1,path);
+                    }
+                    if (name.Substring(0, 1).Equals("2")) {
+                        Myini.ADDIniData("JianTing", "Flash", 1, path);
+                    }
+                    if (name.Substring(0, 1).Equals("3")) {
+                        Myini.ADDIniData("JianTing", "Stop", 1, path);
+                    }
+                    if (name.Substring(0, 1).Equals("4")) {
+                        Myini.ADDIniData("JianTing", "Exit", 1, path);
+                    }
+
+                    if (name.Substring(0, 1).Equals("5")) {
+                        Myini.ADDIniData("JianTing", "DisAgree", 1, path);
+                        string result = Myini.ReadIniData("First", "result", "0", path);
+                        if (result.Equals("0")) {
+                            Myini.WriteIniData("First", "result","-1",path);
+                        }
+                    }
+                    if (name.Substring(0, 1).Equals("6")) {
+                        Myini.ADDIniData("JianTing", "Agree", 1, path);
+                        string result = Myini.ReadIniData("First", "result", "0", path);
+                        if (result.Equals("0")) {
+                            Myini.WriteIniData("First", "result", "1", path);
+                        }
+                    }
                 } catch (Exception) {
 
                 }

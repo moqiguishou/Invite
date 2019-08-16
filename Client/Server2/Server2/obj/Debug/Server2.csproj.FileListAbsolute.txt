@@ -5,3 +5,10 @@ D:\桌面\Client\Server2\Server2\obj\Debug\Server2.csprojAssemblyReference.cache
 D:\桌面\Client\Server2\Server2\obj\Debug\Server2.csproj.CoreCompileInputs.cache
 D:\桌面\Client\Server2\Server2\obj\Debug\Server2.exe
 D:\桌面\Client\Server2\Server2\obj\Debug\Server2.pdb
+E:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.exe.config
+E:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.exe
+E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.csprojAssemblyReference.cache
+E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.csproj.CoreCompileInputs.cache
+E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.exe
+E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.pdb
+E:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.pdb
