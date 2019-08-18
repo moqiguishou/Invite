@@ -12,3 +12,10 @@ E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.csproj.CoreCompileI
 E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.exe
 E:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.pdb
 E:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.pdb
+F:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.exe.config
+F:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.exe
+F:\邀请函\Invite\Client\Server2\Server2\bin\Debug\Server2.pdb
+F:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.csprojAssemblyReference.cache
+F:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.csproj.CoreCompileInputs.cache
+F:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.exe
+F:\邀请函\Invite\Client\Server2\Server2\obj\Debug\Server2.pdb

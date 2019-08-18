@@ -26,19 +26,36 @@ namespace NoClose {
         /// 使用代码编辑器修改此方法的内容。
         /// </summary>
         private void InitializeComponent() {
+            this.txt_PM = new System.Windows.Forms.TextBox();
+            this.lab_mes = new System.Windows.Forms.Label();
             this.btn_disagree = new System.Windows.Forms.Button();
             this.btn_agree = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.txt_PM = new System.Windows.Forms.TextBox();
-            this.lab_mes = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
+            // 
+            // txt_PM
+            // 
+            this.txt_PM.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.txt_PM.Location = new System.Drawing.Point(463, 639);
+            this.txt_PM.Name = "txt_PM";
+            this.txt_PM.Size = new System.Drawing.Size(440, 29);
+            this.txt_PM.TabIndex = 10;
+            // 
+            // lab_mes
+            // 
+            this.lab_mes.AutoSize = true;
+            this.lab_mes.Font = new System.Drawing.Font("宋体", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lab_mes.Location = new System.Drawing.Point(381, 52);
+            this.lab_mes.Name = "lab_mes";
+            this.lab_mes.Size = new System.Drawing.Size(0, 24);
+            this.lab_mes.TabIndex = 11;
             // 
             // btn_disagree
             // 
             this.btn_disagree.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btn_disagree.Image = global::NoClose.Properties.Resources.dis_agree;
-            this.btn_disagree.Location = new System.Drawing.Point(521, 352);
+            this.btn_disagree.Location = new System.Drawing.Point(1366, 768);
             this.btn_disagree.Name = "btn_disagree";
             this.btn_disagree.Size = new System.Drawing.Size(100, 100);
             this.btn_disagree.TabIndex = 9;
@@ -49,7 +66,7 @@ namespace NoClose {
             // 
             this.btn_agree.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btn_agree.Image = global::NoClose.Properties.Resources.agree_big;
-            this.btn_agree.Location = new System.Drawing.Point(884, 352);
+            this.btn_agree.Location = new System.Drawing.Point(1366, 768);
             this.btn_agree.Name = "btn_agree";
             this.btn_agree.Size = new System.Drawing.Size(100, 100);
             this.btn_agree.TabIndex = 0;
@@ -57,28 +74,12 @@ namespace NoClose {
             // 
             // pictureBox1
             // 
+            this.pictureBox1.BackgroundImage = global::NoClose.Properties.Resources.bg_Ali_chat2;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(1366, 768);
             this.pictureBox1.TabIndex = 8;
             this.pictureBox1.TabStop = false;
-            // 
-            // txt_PM
-            // 
-            this.txt_PM.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.txt_PM.Location = new System.Drawing.Point(411, 639);
-            this.txt_PM.Name = "txt_PM";
-            this.txt_PM.Size = new System.Drawing.Size(447, 29);
-            this.txt_PM.TabIndex = 10;
-            // 
-            // lab_mes
-            // 
-            this.lab_mes.AutoSize = true;
-            this.lab_mes.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.lab_mes.Location = new System.Drawing.Point(381, 52);
-            this.lab_mes.Name = "lab_mes";
-            this.lab_mes.Size = new System.Drawing.Size(0, 19);
-            this.lab_mes.TabIndex = 11;
             // 
             // Form1
             // 

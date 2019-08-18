@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -14,13 +15,15 @@ namespace Server2 {
         private static Socket client_socket;
         private static Socket server_socket;
         private static bool isRun = true;
-        private static string path = @"E:\邀请函\Invite\Client\Server2\Server2\ini.ini";
+        private static string path = @"F:\邀请函\Invite\Client\Server2\Server2\ini.ini";
+        private static string path_advice = @"F:\邀请函\Invite\Client\Server2\Server2\adivice.txt";
         static void Main(string[] args) {
             //ini init
             iniInit();
             //配置端口
             int port = 8888;//端口
-            string ipStr = "192.168.46.182";//"127.0.0.1";
+            string ipStr = "127.0.0.1";
+            //string ipStr = "192.168.46.182";
             IPAddress ip = IPAddress.Parse(ipStr);
             IPEndPoint ipe = new IPEndPoint(ip, port);
             //创建socket
@@ -41,7 +44,6 @@ namespace Server2 {
                     Console.WriteLine("======向{0}发送一条消息:{1}======", "ta", strInput);
                 } catch (Exception) {
 
-                    throw;
                 }
                 
             }
@@ -66,7 +68,7 @@ namespace Server2 {
                     string name = "";
                     byte[] recbyte = new byte[1024];
                     int bytes = client_socket.Receive(recbyte, recbyte.Length, 0);//字节流 
-                    name += Encoding.ASCII.GetString(recbyte, 0, bytes);          //--> 字符流
+                    name += Encoding.Unicode.GetString(recbyte, 0, bytes);          //--> 字符流
                     Console.WriteLine("====={0} 连接成功=====", name);
                     if (name.Substring(0,1).Equals("1")) {
                         Myini.ADDIniData("JianTing", "ReStart",1,path);
@@ -94,6 +96,29 @@ namespace Server2 {
                         if (result.Equals("0")) {
                             Myini.WriteIniData("First", "result", "1", path);
                         }
+                    }
+                    if (name.Substring(0, 1).Equals("7")) {
+                        FileStream fs = new FileStream(path_advice, FileMode.Append);
+                        byte[] data = System.Text.Encoding.Default.GetBytes(name+"\n");
+                        fs.Write(data,0,data.Length);
+                        fs.Flush();
+                        fs.Close();
+                        Console.WriteLine("====={0}", name);
+
+                    }
+                    if (name.Substring(0, 1).Equals("8")) {
+                        FileStream fs = new FileStream(path_advice, FileMode.Append);
+                        byte[] data = System.Text.Encoding.Default.GetBytes(name + "\n");
+                        fs.Write(data, 0, data.Length);
+                        fs.Flush();
+                        fs.Close();
+                    }
+                    if (name.Substring(0, 1).Equals("9")) {
+                        FileStream fs = new FileStream(path_advice, FileMode.Append);
+                        byte[] data = System.Text.Encoding.Default.GetBytes(name + "\n");
+                        fs.Write(data, 0, data.Length);
+                        fs.Flush();
+                        fs.Close();
                     }
                 } catch (Exception) {
 
