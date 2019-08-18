@@ -24,34 +24,27 @@ namespace NoClose {
         //        cp.ExStyle |= 0x02000000;
         //        return cp;
         //    }
-        //不让退出FormClosing += new FormClosingEventHandler(form1_FormClosed);       //重启监听;//524行
-        //不让点不同意监听，btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove);//行
+        //不让点不同意监听，btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove)
         //}
-        #region 变量
         //控制
         private bool isOver = false;  //重启
-        private bool isConnectSucced = false;
-        private bool isTishi = false;//是否提示主动弹出PM框
+        private bool isHuang = false;  //同意晃动
         private bool isAgree = false;  //是否答应
         private bool isPlayagreecg = false;  //是否答应
         private bool isCGOver = false;  //cg结束
+        private bool isZi = true;     //cg字
+        private bool isALi = false;   //cg阿狸
         private bool isBegin = false; //第一次点击
         private bool isFirst = true; //第一次进入
+        private bool isChose = false; //开始考虑
         private bool isDisRun = false; //不同意进入逃跑状态
         private bool isShowMes = false; //显示提示
         private int speed = 20;//不同意逃跑速度
+        private int time_zi = 100;
         private int nLastTime = 0;
         private int nNowTime = 0;
-        private bool isExit = false;
-        private bool[] exitbools = {false,false,false,false,false};
+
         private int numIndex = 5;
-
-
-        //PM框 控制
-        private bool hasText = false;
-        private string tishi = "你的名字";
-        //阶段
-        private int JieDuan = 0;
 
         private string[] exitPM = {
             "Nizw",
@@ -64,7 +57,6 @@ namespace NoClose {
             "sumi",
             "sly",
             "苏亚玲",
-            "suyaling",
         };
         private string[] exit2PM = {
             "shutdown",
@@ -73,9 +65,9 @@ namespace NoClose {
             "e",
         };
         //范围
-        private RectangleF bg = new RectangleF(0, 0, 1366f, 768f);
-        //private RectangleF r_agree = new RectangleF(1015, 158, 100, 100);
-        //private RectangleF r_disagree = new RectangleF(0, 0, 100, 100);
+        private RectangleF r_bg = new RectangleF(0, 0, 1366f, 768f);
+        private RectangleF r_ALi = new RectangleF(1015, 158, 200, 280);
+        private RectangleF r_ALi_chat = new RectangleF(0, 0, 1366, 768);
 
         private int[] zi_x = { 1000, 1050, 1100, 1150, 1030, 1080, 1070, 1120 };
         private int[] zi_y = { 200, 210, 220, 230, 265, 275, 325, 335 };
@@ -87,11 +79,22 @@ namespace NoClose {
 
         //绘图变
         private Graphics gs;
-        private Image im_bgagree;
-        private Image[] BgDraws = new Image[25];
-        private Image[] im_disagreeL = new Image[5];
-        private Image[] im_disagreeR = new Image[5];
+        private Image im_ALi_chat;
+        //字
+        private Image im_zi_0;
+        private Image im_zi_1;
+        private Image im_zi_2;
+        private Image im_zi_3;
+        private Image im_zi_4;
+        private Image im_zi_5;
+        private Image im_zi_6;
+        private Image im_zi_7;
+        private Image im_zi_8;
+        //run
+        private Image[] im_runL = new Image[5];
+        private Image[] im_runR = new Image[5];
         private Image[] im_Agree = new Image[19];
+        //private List<Image> im_zi;
 
         //路径
         private string Path_Ini = "../../Ini.ini";
@@ -102,42 +105,106 @@ namespace NoClose {
         private string[] donotit = {
             "直接退出是不行的",
             "你可以问问阿狸怎么退出",
-            "如果你知道特殊的命令，那你就能直接退出去了",
+            "如果你知道特殊的命令，那你就能直接出去了",
             "好期待~",
         };
         //Client
+        private bool isClientRun = true;
         private bool isClientFlash = false;
         private IPEndPoint ipe;
         private Socket client_socket;
         private string resiveMesg = "";
-        #endregion
+
         public Form1() {
             InitializeComponent();
             ClientInit();
             PathInit();
-            Init_Image();
-            TimeCheck();
-
-            //txt初始
+            string sLasttime = MyIni.ReadIniData("Time", "Last", "0", Path_Ini);
+            int.TryParse(sLasttime, out nLastTime);
+            var strTime = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
+            nNowTime = (int)strTime.TotalSeconds;
+            int cha = nNowTime - nLastTime;
+            var nowTime = new DateTime(1970, 1, 1, 8, 0, 0).AddSeconds(cha);//时间戳转时间
+            //lab_mes.Text = nLastTime + "; " + nNowTime+"; "+ nowTime.ToString();
+            //lab_mes.Text = "LastTime:"+ sLasttime + " 时间差：" + cha + "; " + nowTime.ToString();
+            //showMes("LastTime:" + sLasttime + " 时间差：" + cha + "; " + nowTime.ToString());
             txt_PM.Hide();
-            txt_PM.Text = "你的名字";
-            txt_PM.ForeColor = Color.LightGray;
+            if (cha > 50) {
+                isFirst = true;
+                //背景图设置
+                pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");//Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
+                btn_disagree.Hide();
+                btn_agree.Hide();
+            } else {
+                isCGOver = true;
+                showMes(donotit);
+                isFirst = false;
+                pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChat_2.png");//Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
+            }
+            if (!isFirst) {
+                isBegin = true;
+            }
+
+
+
+            ////采用双缓冲技术的控件必需的设置
+            //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
             //监听
             FormClosing += new FormClosingEventHandler(form1_FormClosed);       //重启监听
+            pictureBox1.MouseMove += new MouseEventHandler(Form1_MouseMove);     //画面点击
             pictureBox1.MouseDown += new MouseEventHandler(pictureBox1_MouseDown);//鼠标移动
             btn_agree.MouseUp += new MouseEventHandler(Btnagree_MouseUp);
             btn_agree.MouseDown += new MouseEventHandler(Btnagree_MouseDown);
-            btn_disagree.MouseMove += new MouseEventHandler(BtnDisagree_MouseMove);//危险，选中不同意
+            btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove);//危险，选中不同意
             KeyDown += new KeyEventHandler(Form1_KeyDown);                      //回车键
-            txt_PM.Leave += new EventHandler(txt_PM_Leave);
-            txt_PM.Enter += new EventHandler(txt_PM_Enter);
+           //加载图片
+            Init_Image();
 
             Thread mesThread = new Thread(Mes);
             mesThread.Start();
         }
 
-        
-        #region 资源加载
+        private void ClientInit() {
+            string ipStr = "192.168.46.182";// "127.0.0.1";
+            int port = 8888;
+            IPAddress ip = IPAddress.Parse(ipStr);
+            ipe = new IPEndPoint(ip, port);
+            //Thread mythread = new Thread(MyThread_showMesg);
+            //mythread.Start();
+            //创建客户端socket
+            client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //连接服务器
+            try {
+                client_socket.Connect(ipe);
+                Thread thread = new Thread(MyThread_recive);
+                thread.Start();
+            } catch (Exception) {
+
+            }
+        }
+
+        private void MyThread_recive() {
+            while (isClientRun) {
+                try {
+                    //接收消息
+                    string recStr = "";
+                    byte[] recBytes = new byte[1024];
+                    int bytes = client_socket.Receive(recBytes, recBytes.Length, 0);
+                    recStr += Encoding.Unicode.GetString(recBytes, 0, bytes);
+                    resiveMesg = recStr;// "From Server messages: {0}" + recStr;
+                    isClientFlash = true;
+                    Thread.Sleep(50);
+                    showMes(resiveMesg);
+                } catch (Exception) {
+
+                }
+            }
+        }
+
+        //private void MyThread_showMesg() {
+        //    throw new NotImplementedException();
+        //}
+
         /// <summary>
         /// 路径获取
         /// </summary>
@@ -148,58 +215,38 @@ namespace NoClose {
         }
 
         private void Init_Image() {
-            BgDraws[0] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_0.jpg");
+            im_ALi_chat = Image.FromFile(Path_Project + @"\NoClose\Properties\bg\bg_window2.png");
             //字
-            BgDraws[1] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_z1.jpg");
-            BgDraws[2] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_z2.jpg");
-            BgDraws[3] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_z3.jpg");
-            BgDraws[4] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_z4.jpg");
-            BgDraws[5] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_z5.jpg");
-
-            BgDraws[6] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi21.jpg");
-            BgDraws[7] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi22.jpg");
-            BgDraws[8] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi23.jpg");
-            BgDraws[9] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi24.jpg");
-            BgDraws[10] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi25.jpg");
-            BgDraws[11] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi26.jpg");
-            BgDraws[12] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi27.jpg");
-            BgDraws[13] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_zi28.jpg");
-            //bg
-            BgDraws[14] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_0.jpg");
-            //Ali
-            BgDraws[15] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_1.jpg");
-            BgDraws[16] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_2.jpg");
-            BgDraws[17] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_3.jpg");
-            BgDraws[18] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_4.jpg");
-            BgDraws[19] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_5.jpg");
-            BgDraws[20] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_6.jpg");
-            BgDraws[21] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_7.jpg");
-            BgDraws[22] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_8.jpg");
-            //chat
-            BgDraws[23] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_chat1.jpg");
-            BgDraws[24] = Image.FromFile(Path_Project + @"\NoClose\Properties\draw\bg_Ali_chat2.jpg");
-            //btn
-            im_disagreeL[0] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_1.png");
-            im_disagreeL[1] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_2.png");
-            im_disagreeL[2] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_3.png");
-            im_disagreeL[3] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_4.png");
-            im_disagreeL[4] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_5.png");
-            im_disagreeR[0] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_11.png");
-            im_disagreeR[1] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_12.png");
-            im_disagreeR[2] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_13.png");
-            im_disagreeR[3] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_14.png");
-            im_disagreeR[4] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_15.png");
-            //agree
-            im_Agree[0]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_1.png");
-            im_Agree[1]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_2.png");
-            im_Agree[2]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_3.png");
-            im_Agree[3]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_4.png");
-            im_Agree[4]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_5.png");
-            im_Agree[5]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_6.png");
-            im_Agree[6]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_7.png");
-            im_Agree[7]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_8.png");
-            im_Agree[8]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_9.png");
-            im_Agree[9]  = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_10.png");
+            im_zi_0 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_0.png");
+            im_zi_1 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_0.png");
+            im_zi_2 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_0.png");
+            im_zi_3 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_0.png");
+            im_zi_4 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_4.png");
+            im_zi_5 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_5.png");
+            im_zi_6 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_6.png");
+            im_zi_7 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_7.png");
+            im_zi_8 = im_zi_0;//mage.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_8.png");
+            //run
+            im_runL[0] = Image.FromFile(Path_Project+ @"\NoClose\Properties\run\dis_1.png");
+            im_runL[1] = Image.FromFile(Path_Project+ @"\NoClose\Properties\run\dis_2.png");
+            im_runL[2] = Image.FromFile(Path_Project+ @"\NoClose\Properties\run\dis_3.png");
+            im_runL[3] = Image.FromFile(Path_Project+ @"\NoClose\Properties\run\dis_4.png");
+            im_runL[4] = Image.FromFile(Path_Project+ @"\NoClose\Properties\run\dis_5.png");
+            im_runR[0] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_11.png");
+            im_runR[1] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_12.png");
+            im_runR[2] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_13.png");
+            im_runR[3] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_14.png");
+            im_runR[4] = Image.FromFile(Path_Project + @"\NoClose\Properties\run\dis_15.png");
+            im_Agree[0] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_1.png");
+            im_Agree[1] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_2.png");
+            im_Agree[2] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_3.png");
+            im_Agree[3] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_4.png");
+            im_Agree[4] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_5.png");
+            im_Agree[5] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_6.png");
+            im_Agree[6] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_7.png");
+            im_Agree[7] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_8.png");
+            im_Agree[8] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_9.png");
+            im_Agree[9] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_10.png");
             im_Agree[10] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_11.png");
             im_Agree[11] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_12.png");
             im_Agree[12] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_13.png");
@@ -210,170 +257,426 @@ namespace NoClose {
             im_Agree[17] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_18.png");
             im_Agree[18] = Image.FromFile(Path_Project + @"\NoClose\Properties\agree\agree_19.png");
 
-            im_bgagree = Image.FromFile(Path_Project+ @"\NoClose\Properties\bg_agree.jpg");
         }
-        #endregion
 
+        private void form1_FormClosed(object sender, FormClosingEventArgs e) {
+            MyIni.WriteIniData("Time", "Last", nNowTime.ToString(), Path_Ini);
+            if (!isOver) {
+                reStart();
+            } else {
+                System.Environment.Exit(0);
+            }
+        }
+        //无限循环
+        private void reStart() {
+            Client_SendMesg("1:重启");
+            ProcessStartInfo startInfo = new ProcessStartInfo {
+                FileName = "wscript.exe",
+                //Arguments = @"..\reStart.vbs"
+                Arguments = Path_Project + @"\reStart.vbs"
+            };
+            Process.Start(startInfo);
+        }
 
-
-
-        #region 线程逻辑
+        
         public void Draw1() {
             gs = pictureBox1.CreateGraphics();
-            //开始先等待CG
+            while (true) {
+                while (isZi) {
+                    //背景
+                    gs.DrawImage(im_zi_1, new Rectangle(zi_x[0], zi_y[0], w[0], h[0]));
+                    gs.DrawImage(im_zi_2, new Rectangle(zi_x[1], zi_y[1], w[1], h[1]));
+                    gs.DrawImage(im_zi_3, new Rectangle(zi_x[2], zi_y[2], w[2], h[2]));
+                    gs.DrawImage(im_zi_4, new Rectangle(zi_x[3], zi_y[3], w[3], h[3]));
+                    gs.DrawImage(im_zi_5, new Rectangle(zi_x[4], zi_y[4], w[4], h[4]));
+                    gs.DrawImage(im_zi_6, new Rectangle(zi_x[5], zi_y[5], w[5], h[5]));
+                    gs.DrawImage(im_zi_7, new Rectangle(zi_x[6], zi_y[6], w[6], h[6]));
+                    gs.DrawImage(im_zi_8, new Rectangle(zi_x[7], zi_y[7], w[7], h[7]));
+                }
+                while (isALi) {
+                    gs.DrawImage(im_ALi_chat,r_ALi_chat);
+                }
+                if (isChose) {
+                    break;
+                }
+            }
+            
+        }
+        public void Draw2() {
+            DateTime current = DateTime.Now;
+            im_zi_1 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_1.png");
+            while (current.AddMilliseconds(time_zi) > DateTime.Now) {
+                if (w[0] < 50) {
+                    //Thread.Sleep(1);
+                    w[0] = 50;
+                    h[0] = 50;
+                }
+            }
+            im_zi_2 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_2.png");
+            while (current.AddMilliseconds(time_zi*2) > DateTime.Now) {
+                if (w[1] < 50) {
+                    //Thread.Sleep(1);
+                    w[1] = 50;
+                    h[1] = 50;
+                }
+            }
+            im_zi_3 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_3.png");
+            while (current.AddMilliseconds(time_zi * 3) > DateTime.Now) {
+                if (w[2] < 50) {
+                    //Thread.Sleep(1);
+                    w[2] = 50;
+                    h[2] = 50;
+                }
+            }
+            im_zi_4 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_4.png");
+            while (current.AddMilliseconds(time_zi * 4) > DateTime.Now) {
+                if (w[3] < 50) {
+                    //Thread.Sleep(1);
+                    w[3] = 50;
+                    h[3] = 50;
+                }
+            }
+            w[4] = 50;
+            h[4] = 50;
+            im_zi_5 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_5.png");
+            //while (current.AddMilliseconds(time_zi * 5) > DateTime.Now) {
+            //    if (w[4] < 50) {
+            //        Thread.Sleep(1);
+            //        w[4] = w[4] + 1;
+            //        h[4] = h[4] + 1;
+            //    }
+            //}
+            Thread.Sleep(time_zi);
+            im_zi_6 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_6.png");
+            while (current.AddMilliseconds(time_zi * 6) > DateTime.Now) {
+                if (w[5] < 50) {
+                    //Thread.Sleep(1);
+                    //w[5] = w[2] + 1;
+                    //h[5] = h[2] + 1;
+                    w[5] = 50;
+                    h[5] = 50;
+                }
+            }
+            im_zi_7 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_7.png");
+            im_zi_8 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_8.png");
+            while (current.AddMilliseconds(time_zi * 7) > DateTime.Now) {
+                if (w[6] < 50) {
+                    //Thread.Sleep(1);
+                    w[6] = 50;//6] + 1;
+                    h[6] = 50;//h[6] + 1;
+                    w[7] = 50;//6] + 1;
+                    h[7] = 50;//h[6] + 1;
+                }
+            }
+            im_zi_1 = im_zi_0;
+            im_zi_2 = im_zi_0;
+            im_zi_3 = im_zi_0;
+            im_zi_4 = im_zi_0;
+            im_zi_5 = im_zi_0;
+            im_zi_6 = im_zi_0;
+            im_zi_7 = im_zi_0;
+            im_zi_8 = im_zi_0;
+            isZi = false;
             Thread.Sleep(1000);
-            //第一句话
-            for (int i = 1; i <= 5; i++) {
-                gs.DrawImage(BgDraws[i], bg);
-                Thread.Sleep(100);
-            }
-            Thread.Sleep(1500);
-            //第二句话
-            for (int i = 6; i <= 13; i++) {
-                gs.DrawImage(BgDraws[i], bg);
-                Thread.Sleep(100);
-            }
-            Thread.Sleep(1500);
-            //阿里来
-            for (int i = 14; i <= 22; i++) {
-                gs.DrawImage(BgDraws[i], bg);
-                Thread.Sleep(50);
-            }
-            Thread.Sleep(1500);
-            //chat1
-            gs.DrawImage(BgDraws[23], bg);
-            Thread.Sleep(3000);
-            gs.DrawImage(BgDraws[24], bg);
-            Thread.Sleep(3000);
-            pictureBox1.Image = BgDraws[24];
+            
+            pictureBox1.Image= Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
             gs.Clear(this.BackColor);
-            //按钮现
+            //gs.Dispose();
+            //gs = pictureBox1.CreateGraphics();
+            isZi = true;
+            Thread.Sleep(time_zi);
+            im_zi_1 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_11.png");
+            Thread.Sleep(time_zi);
+            im_zi_2 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_12.png");
+            Thread.Sleep(time_zi);
+            im_zi_3 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_13.png");
+            Thread.Sleep(time_zi);
+            im_zi_4 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_14.png");
+            Thread.Sleep(time_zi);
+            im_zi_5 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_15.png");
+            Thread.Sleep(time_zi);
+            im_zi_6 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_16.png");
+            Thread.Sleep(time_zi);
+            im_zi_7 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_17.png");
+            Thread.Sleep(time_zi);
+            im_zi_8 = Image.FromFile(Path_Project + @"\NoClose\Properties\zi\zi_18.png");
+            isZi = false;
+            Thread.Sleep(1000);
+            pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\bg\background1.jpg");
+            gs.Clear(this.BackColor);
+            isALi = true;
+            Thread.Sleep(500);
+            im_ALi_chat = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChatBg0.jpg");
+            Thread.Sleep(500);
+            im_ALi_chat = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChat_1.png");
+            Thread.Sleep(3000);
+            im_ALi_chat = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChat_2.png");
+            Thread.Sleep(500);
+            isALi = false;
+            Thread.Sleep(500);
             isCGOver = true;
-            btn_agree.Location = new Point(811, 270);
-            btn_disagree.Location = new Point(496, 319);
-            showMes("点击阿狸，会有帮助！");
+            isChose = true;
+            gs.Clear(this.BackColor);
+            gs.Dispose();
+            pictureBox1.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\chat\ALiChat_2.png");
         }
 
+        private void Btnagree_MouseDown(object sender, MouseEventArgs e) {
+            Client_SendMesg("6:同意");
+            isOver = true;
+            if (!isAgree) {
+                btn_agree.Size = new Size(80, 80);
+                btn_agree.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\agree_s.png");
+            }
+        }
+        private void Btnagree_MouseUp(object sender, MouseEventArgs e) {
+            showMes(new string[] { "说好的哦", "那快退出吧，不许变哦", "不过这周是有加班的，我们也可以下周约的，你答应了就好", "那这周去吗，好像有加班的样子的" });
+            if (!isAgree) {
+                isAgree = true;
+                btn_agree.Size = new Size(224, 224);
+                Thread agreethread = new Thread(fiAgree);
+                agreethread.Start();
+                
+            }
+            isPlayagreecg = true;
+        }
+
+        private void fiAgree() {
+            while (true) {
+                while (isPlayagreecg) {
+                    for (int i = 0; i < im_Agree.Length; i++) {
+                        btn_agree.Image = im_Agree[i];
+                        Thread.Sleep(100);
+                    }
+                    isPlayagreecg = false;
+                }
+            }
+        }
+            //休息
+            //public static void Delay(int mm) {
+            //    DateTime current = DateTime.Now;
+            //    while (current.AddMilliseconds(mm) > DateTime.Now) {
+            //        Application.DoEvents();
+            //    }
+            //    return;
+            //}
+
+         private void Form1_MouseMove(object sender, MouseEventArgs e) {
+            if (true) {
+                //r_Tao_chat = new RectangleF(e.X, e.Y, 300,100);
+            }
+         }
         /// <summary>
-        /// 不同意逃跑逻辑
+        /// 鼠标一经过就随机生成一个位置
+        /// 前面要btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove)
         /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnDisagree_MouseMove(object sender, MouseEventArgs e) {
+            if (!isDisRun) {
+                Client_SendMesg("2:鼠标瞬移");
+                numIndex = numIndex - 1;
+                Random random = new Random();
+                int x = random.Next(1, 1266);
+                int y = random.Next(1, 668);
+                btn_disagree.Location = new Point(x, y);
+                if (numIndex <= 0) {
+                    txt_PM.Show();
+                    txt_PM.Text = "请输入名字";
+                    showMes("实在想抓住他的话，也是可以输入命令的");
+                }
+            }
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e) {
+            if (!isBegin&&isFirst) {
+                isBegin = true;
+                Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
+                t_Draw1.Start();
+                Thread t_Draw2 = new Thread(new ThreadStart(Draw2));
+                t_Draw2.Start();
+            }
+            if (isCGOver) {
+                btn_agree.Show();
+                btn_disagree.Show();
+            }
+            if (isBegin && isCGOver && e.X >= 1015 && e.X <= 1215 && e.Y >= 158 && e.Y <= 438) {
+                //点中Ali
+                txt_PM.Show();
+                txt_PM.Text = "请输入名字";
+            } else {
+                txt_PM.Hide();
+            }
+        }
+
+        private void btn_disagree_Click(object sender, EventArgs e) {
+            Client_SendMesg("5:不同意");
+            isOver = true;
+            showMes(new string[] { "要哭了哦","周末开心" });
+        }
+
+        //private void textBox1_TextChanged(object sender, EventArgs e) {
+
+        //}
+
+        //回车键
+        private void Form1_KeyDown(object sender, KeyEventArgs e){
+
+            if (e.KeyCode == Keys.Enter){
+                string strPM = txt_PM.Text.ToLower();
+                for (int i = 0; i < exitPM.Length; i++) {
+                    if (exitPM[i].ToLower().Equals(strPM)) {
+                        Client_SendMesg("3:停止瞬移");
+                        //lab_mes.Text = "小灰兔子不再乱跑了";
+                        showMes("小灰兔子不再乱跑了");
+                        isDisRun = true;
+                        btn_disagree.Image = im_runL[0];
+                        Thread runThred = new Thread(DisAgreeRun);
+                        runThred.Start();
+                        Thread speedThred = new Thread(Changespeed);
+                        speedThred.Start();
+                    }
+                }
+                for (int i = 0; i < exit2PM.Length; i++) {
+                    if (exit2PM[i].ToLower().Equals(strPM)) {
+                        //lab_mes.Text = "小灰兔子不再乱跑了";
+                        //showMes("好吧，那你有空的话再来哦，可以直接关掉了");
+                        Client_SendMesg("4:直接退出");
+                        isOver = true;
+                        System.Environment.Exit(0);
+                        //this.Close();
+                    }
+                }
+            }
+        }
+
+        private void LabInitPos() {
+            //1366,768
+            int newX = (1366 - lab_mes.Size.Width) / 2;
+            lab_mes.Location = new System.Drawing.Point(newX, lab_mes.Location.Y);
+        }
+
+        
         private void DisAgreeRun() {
             int index = 0;
             Image[] lin = new Image[5];
-            while (!isExit) {
-                while (speed != 0) {
-                    Random random = new Random();
-                    int x = random.Next(1, 1266);
-                    int y = random.Next(1, 668);
+            while (true) {
+                Random random = new Random();
+                int x = random.Next(1, 1266);
+                int y = random.Next(1, 668);
+                
+                int btn_x = btn_disagree.Location.X;
+                int btn_y = btn_disagree.Location.Y;
 
-                    int btn_x = btn_disagree.Location.X;
-                    int btn_y = btn_disagree.Location.Y;
+                
+                int abs = Math.Abs(x - btn_x) / (x - btn_x);
+                if (abs == 1) {
+                    lin = im_runR;
+                }
+                if (abs == -1) {
+                    lin = im_runL;
+                }
+                if (Math.Abs(x - btn_x) >= Math.Abs(y - btn_y) || true) {
+                    int time = Math.Abs(x - btn_x) / speed;
+                    if (time != 0) {
+                        int speed_y = Math.Abs(y - btn_y) / time;
+                        while (true) {
+                            if (Math.Abs(x - btn_disagree.Location.X) <= 20) {
+                                break;
+                            }
+                            if (speed == 0) {
+                                break;
+                            }
+                            int new_x = btn_disagree.Location.X + speed * ((Math.Abs(x - btn_x) / (x - btn_x)));
+                            int new_y = btn_disagree.Location.Y + speed_y * ((Math.Abs(y - btn_y) / (y - btn_y)));
+                            btn_disagree.Location = new Point(new_x, new_y);
+                            if (btn_disagree.Location.X < 0 || btn_disagree.Location.X > 1266 || btn_disagree.Location.Y < 0 || btn_disagree.Location.Y > 668) {
+                                //最后的保护
+                                break;
+                            }
+                            btn_disagree.Image = lin[index];
 
-
-                    int abs = Math.Abs(x - btn_x) / (x - btn_x);
-                    if (abs == 1) {
-                        lin = im_disagreeR;
-                    }
-                    if (abs == -1) {
-                        lin = im_disagreeL;
-                    }
-                    if (Math.Abs(x - btn_x) >= Math.Abs(y - btn_y) && speed != 0) {
-                        int time = Math.Abs(x - btn_x) / speed;
-                        if (time != 0) {
-                            int speed_y = Math.Abs(y - btn_y) / time;
-                            while (true) {
-                                if (Math.Abs(x - btn_disagree.Location.X) <= 20) {
-                                    break;
-                                }
-                                if (speed == 0) {
-                                    break;
-                                }
-                                int new_x = btn_disagree.Location.X + speed * ((Math.Abs(x - btn_x) / (x - btn_x)));
-                                int new_y = btn_disagree.Location.Y + speed_y * ((Math.Abs(y - btn_y) / (y - btn_y)));
-                                btn_disagree.Location = new Point(new_x, new_y);
-                                if (btn_disagree.Location.X < 0 || btn_disagree.Location.X > 1266 || btn_disagree.Location.Y < 0 || btn_disagree.Location.Y > 668) {
-                                    //最后的保护
-                                    break;
-                                }
-                                btn_disagree.Image = lin[index];
-
-                                Thread.Sleep(10);
-                                if (index >= 4) {
-                                    index = 0;
-                                } else {
-                                    index++;
-                                }
+                            Thread.Sleep(10);
+                            if (index >= 4) {
+                                index = 0;
+                            } else {
+                                index++;
                             }
                         }
                     }
-                    if (Math.Abs(x - btn_x) < Math.Abs(y - btn_y)&&speed != 0) {
-                        int time = y - btn_y / speed;
-                        if (time != 0) {
-                            int speed_x = Math.Abs(x - btn_x) / time;
+                }
+                if (Math.Abs(x - btn_x) < Math.Abs(y - btn_y)) {
+                    int time = y - btn_y / speed;
+                    if (time != 0) {
+                        int speed_x = Math.Abs(x - btn_x) / time;
 
-                            while (true) {
-                                if (Math.Abs(y - btn_disagree.Location.Y) <= 20) {
-                                    break;
-                                }
-                                if (speed == 0) {
-                                    break;
-                                }
-                                int new_y = btn_disagree.Location.Y + speed * ((Math.Abs(x - btn_x) / (x - btn_x)));
-                                int new_x = btn_disagree.Location.X + speed_x * ((Math.Abs(x - btn_y) / (x - btn_y)));
+                        while (true) {
+                            if (Math.Abs(y - btn_disagree.Location.Y) <= 20) {
+                                break;
+                            }
+                            if (speed == 0) {
+                                break;
+                            }
+                            int new_y = btn_disagree.Location.Y + speed * ((Math.Abs(x - btn_x) / (x - btn_x)));
+                            int new_x = btn_disagree.Location.X + speed_x * ((Math.Abs(x - btn_y) / (x - btn_y)));
+                            
+                            btn_disagree.Location = new Point(new_x, new_y);
+                            if (btn_disagree.Location.X < 0 || btn_disagree.Location.X > 1266 || btn_disagree.Location.Y < 0 || btn_disagree.Location.Y > 668) {
+                                //最后的保护
+                                break;
+                            }
+                            btn_disagree.Image = lin[index];
 
-                                btn_disagree.Location = new Point(new_x, new_y);
-                                if (btn_disagree.Location.X < 0 || btn_disagree.Location.X > 1266 || btn_disagree.Location.Y < 0 || btn_disagree.Location.Y > 668) {
-                                    //最后的保护
-                                    break;
-                                }
-                                btn_disagree.Image = lin[index];
-
-                                Thread.Sleep(10);
-                                if (index >= 4) {
-                                    index = 0;
-                                } else {
-                                    index++;
-                                }
+                            Thread.Sleep(10);
+                            if (index >= 4) {
+                                index = 0;
+                            } else {
+                                index++;
                             }
                         }
-                    }
-
-                    if (speed == 0) {
-                        btn_disagree.Image = lin[0];
-                        if (JieDuan == 2) {
-                            JieDuan = 3;
-                        }
-                        break;
                     }
                 }
 
+                if (speed == 0) {
+                    break;
+                }
             }
-            exitbools[0] = true;
+            while (true) {
+                if (index >= 4) {
+                    index = 0;
+                } else {
+                    index++;
+                }
+                btn_disagree.Image = lin[index];
+                Thread.Sleep(100);
+            }
         }
         private void Changespeed() {
-            while (!isExit) {
-                while (isDisRun) {
-                    Thread.Sleep(50);
-                    speed = speed / 2;//10
-                    Thread.Sleep(50);
-                    speed = speed / 2;//5
-                    while (true) {
-                        Thread.Sleep(1000);//2,1,0
-                        speed = speed / 2;
-                        if (speed == 0) {
-                            isDisRun = false;
-                            break;
-                        }
-                    }
+            Thread.Sleep(1000);
+            speed = speed / 2;//10
+            Thread.Sleep(1000);
+            speed = speed / 2;//5
+            while (true) {
+                Thread.Sleep(2000);//2,1,0
+                speed = speed / 2;
+                if (speed == 0) {
+                    break;
                 }
             }
-            exitbools[1] = true;
         }
-        /// <summary>
-        /// 消息提示
-        /// </summary>
+        private void showMes(string s) {
+            lab_mes.Text =s;
+            LabInitPos();
+            isShowMes = true;
+        }
+        private void showMes(string[] strs) {
+            Random r = new Random();
+            int index = r.Next(1,strs.Length);
+            string s = strs[index - 1];
+            showMes(s);
+        }
         private void Mes() {
-            while (!isExit) {
+            while (true) {
                 while (isShowMes) {
                     //Thread.Sleep(2000);
                     if (isClientFlash) {
@@ -391,497 +694,21 @@ namespace NoClose {
                     isClientFlash = false;
                 }
             }
-            exitbools[2] = true;
         }
-        private void fiAgree() {
-            while (!isExit) {
-                while (isPlayagreecg) {
-                    for (int i = 0; i < im_Agree.Length; i++) {
-                        btn_agree.Image = im_Agree[i];
-                        Thread.Sleep(100);
-                    }
-                    isPlayagreecg = false;
-                }
-            }
-            exitbools[3] = true;
-        }
-
-        #region 跑步第二套
-        //int runspeed = 50;
-        //int OnceYi = 20;
-        //private void btn_disRunPos() {
-        //    while (isDisRun) {
-        //        Random random = new Random();
-        //        int x = random.Next(1, 1266);
-        //        int y = random.Next(1, 668);
-        //        btn_agree.Text = (x + "," + y);
-        //        int bx = btn_disagree.Location.X;
-        //        int by = btn_disagree.Location.Y;
-
-        //        if (y == by) {
-        //            if (x == bx) {
-        //            } else {
-        //                run_x(x, y, bx, by);
-        //            }
-        //        } else if (x == bx) {
-        //            if (y == by) { } else {
-        //                run_y(x, y, bx, by);
-        //            }
-        //        } else if (Math.Abs(x - bx) >= Math.Abs(y - by)) {
-        //            run_xbigy(x, y, bx, by);
-        //        } else if (Math.Abs(x - bx) <= Math.Abs(y - by)) {
-        //            run_ybigx(x, y, bx, by);
-        //        }
-        //    }
-        //}
-        //private void run_x(int x, int y, int bx, int by) {
-        //    int dirX = (x - bx) / (Math.Abs(x - bx));
-        //    while (true) {
-        //        if (Math.Abs(x - btn_disagree.Location.X) <= OnceYi) {
-        //            break;
-        //        }
-        //        if (finilProtect()) {
-        //            break;
-        //        }
-        //        int nx = btn_disagree.Location.X + OnceYi * dirX;
-        //        btn_disagree.Location = new Point(nx, by);
-
-        //        Thread.Sleep(runspeed);
-        //    }
-        //}
-        //private void run_y(int x, int y, int bx, int by) {
-        //    int dirY = (y - by) / (Math.Abs(y - by));
-        //    while (true) {
-        //        if (Math.Abs(y - btn_disagree.Location.Y) <= OnceYi) {
-        //            break;
-        //        }
-        //        if (finilProtect()) {
-        //            break;
-        //        }
-        //        int ny = btn_disagree.Location.Y + OnceYi * dirY;
-        //        btn_disagree.Location = new Point(bx, ny);
-
-        //        Thread.Sleep(runspeed);
-        //    }
-        //}
-        //private void run_xbigy(int x, int y, int bx, int by) {
-        //    int dirX = (x - bx) / (Math.Abs(x - bx));
-        //    int dirY = (y - by) / (Math.Abs(y - by));
-        //    int index = 0;
-        //    while (true) {
-        //        if (Math.Abs(x - btn_disagree.Location.X) <= OnceYi) {
-        //            break;
-        //        }
-        //        if (finilProtect()) {
-        //            break;
-        //        }
-        //        int nx = btn_disagree.Location.X + OnceYi * dirX;
-        //        if (btn_disagree.Location.Y == y) {
-        //            run_x(x, y, btn_disagree.Location.X, btn_disagree.Location.Y);
-        //            break;
-        //        } else {
-        //            index++;
-        //            int ny;
-        //            if (index == Math.Abs(btn_disagree.Location.X - x) / Math.Abs(btn_disagree.Location.Y - y)) {
-        //                ny = btn_disagree.Location.Y + OnceYi * dirY;
-        //                index = 0;
-        //            } else {
-        //                ny = btn_disagree.Location.Y;
-        //            }
-        //            btn_disagree.Location = new Point(nx, ny);
-        //        }
-
-        //        Thread.Sleep(runspeed);
-
-        //    }
-        //}
-        //private void run_ybigx(int x, int y, int bx, int by) {
-        //    int dirX = (x - bx) / (Math.Abs(x - bx));
-        //    int dirY = (y - by) / (Math.Abs(y - by));
-        //    int index = 0;
-        //    while (true) {
-        //        if (Math.Abs(y - btn_disagree.Location.Y) <= OnceYi) {
-        //            break;
-        //        }
-        //        if (finilProtect()) {
-        //            break;
-        //        }
-        //        int ny = btn_disagree.Location.Y + OnceYi * dirY;
-        //        if (btn_disagree.Location.X == x) {
-        //            run_y(x, y, btn_disagree.Location.X, btn_disagree.Location.Y);
-        //            break;
-        //        } else {
-        //            index++;
-        //            int nx;
-        //            if (index == Math.Abs(btn_disagree.Location.Y - y) / Math.Abs(btn_disagree.Location.X - x)) {
-        //                nx = btn_disagree.Location.X + OnceYi * dirX;
-        //                index = 0;
-        //            } else {
-        //                nx = btn_disagree.Location.X;
-        //            }
-        //            btn_disagree.Location = new Point(nx, ny);
-        //        }
-
-        //        Thread.Sleep(runspeed);
-        //    }
-        //}
-        //private bool finilProtect() {
-        //    if (btn_disagree.Location.X < 0 || btn_disagree.Location.X > 1266 || btn_disagree.Location.Y > 668 || btn_disagree.Location.Y < 0) {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        #endregion
-        #endregion
-
-        #region 监听
-        /// <summary>
-        /// 关闭监听无限循环
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void form1_FormClosed(object sender, FormClosingEventArgs e) {
-            isExit = true;
-            DateTime current = DateTime.Now;
-            bool over = false;
-            while (current.AddMilliseconds(500) > DateTime.Now) {
-                for (int i = 0; i < exitbools.Length; i++) {
-                    if (!exitbools[i]) {
-                        break;
-                    }
-                    over = true;
-                    break;
-                }
-                if (over) {
-                    break;
-                }
-            }
-            MyIni.WriteIniData("Time", "Last", nNowTime.ToString(), Path_Ini);
-            if (!isOver) {
-                reStart();
-            } else {
-                System.Environment.Exit(0);
-            }
-        }
-        //无限循环
-        private void reStart() {
-            Client_SendMesg("1:重启");
-            //BgDraws
-            string str = MyIni.ReadIniData("Path", "ReStar", "-1", Path_Ini);
-            if (str.Equals("-1")) {
-                str = "../../reStart.vbs";
-            }
-            ProcessStartInfo startInfo = new ProcessStartInfo {
-                FileName = "wscript.exe",
-                Arguments = str
-            };
-            Process.Start(startInfo);
-        }
-
-        /// <summary>
-        /// PM命令框监听
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void txt_PM_Leave(object sender, EventArgs e){
-            if (txt_PM.Text == ""|| txt_PM.Text == "无效") {
-                hasText = false;                            //文本框有文本置为假
-                txt_PM.Text = tishi;                        //显示提示信息
-                txt_PM.ForeColor = Color.LightGray;         //字体颜色设为浅灰色
-
-            } else {
-                hasText = true;                             //否则为文本框有文本
-            } 
-        }
-        private void txt_PM_Enter(object sender, EventArgs e){
-            if (hasText == false){
-                txt_PM.Text = "";                               //清空文本
-                txt_PM.ForeColor = Color.Black;                 //文本颜色设为黑色
-            }
-        }
-
-        private void Btnagree_MouseDown(object sender, MouseEventArgs e) {
-            Client_SendMesg("6:同意");
-            
-            
-            lab_mes.Text = "好的呢！那你喜欢早晨玩还是傍晚呢，有没有什么计划想法？";
-            LabInitPos();
-            txt_PM.Text = "喜欢运动的时间；建议";
-            txt_PM.ForeColor = Color.LightGray;
-            txt_PM.Show();
-            
-            pictureBox1.Image = im_bgagree;
-            if (!isAgree) {
-                isOver = true;
-                JieDuan = 5;
-                btn_disagree.Hide();
-                btn_agree.Size = new Size(80, 80);
-                btn_agree.Location = new Point(275,349);
-                btn_agree.Image = Image.FromFile(Path_Project + @"\NoClose\Properties\agree_s.png");
-            }
-        }
-        private void Btnagree_MouseUp(object sender, MouseEventArgs e) {
-            if (!isAgree) {
-                isAgree = true;
-                btn_agree.Size = new Size(224, 224);
-                Thread agreethread = new Thread(fiAgree);
-                agreethread.Start();
-            }
-            isPlayagreecg = true;
-        }
-
-        /// <summary>
-        /// 鼠标一经过就随机生成一个位置
-        /// 前面要btn_disagree.MouseMove+=new MouseEventHandler(BtnDisagree_MouseMove)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtnDisagree_MouseMove(object sender, MouseEventArgs e) {
-            if (!isDisRun&&JieDuan==0) {
-                Client_SendMesg("2:鼠标瞬移");
-                numIndex = numIndex - 1;
-                Random random = new Random();
-                int x = random.Next(1, 1266);
-                int y = random.Next(1, 668);
-                btn_disagree.Location = new Point(x, y);
-                if (numIndex <= 0) {
-                    if (!isTishi) {
-                        txt_PM.Show();
-                        isTishi = true;
-                    }
-                    //txt_PM.Text = "你的名字";
-                    showMes("小灰兔子有技能，着实难抓，可以试着输入作弊码");
-                }
-            }
-            //if (isDisRun&&JieDuan==1) {
-            //    speed = 40;
-            //}
-        }
-
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e) {
-            if (!isBegin && isFirst) {
-                isBegin = true;
-                Thread t_Draw1 = new Thread(new ThreadStart(Draw1));
-                t_Draw1.Start();
-            }
-            if (isBegin && isCGOver && e.X >= 1015 && e.X <= 1215 && e.Y >= 158 && e.Y <= 438) {
-                //点中Ali
-                txt_PM.Show();
-                //txt_PM.Text = "请输入名字";
-            } else {
-                txt_PM.Hide();
-            }
-        }
-
-        private void btn_disagree_Click(object sender, EventArgs e) {
-            if (JieDuan == 1) {
-                showMes(new string[] { "还觉的太快的话，再输入作弊码吧", "小灰兔子还有个加速技能" });
-                isDisRun = true;
-                speed = 40;
-            }
-            Client_SendMesg("5:不同意");
-            if (JieDuan == 3) {
-                isOver = true;
-                lab_mes.Text = "好的，那下次再约喽,可以退出了。如果点错了的话，还是可以点小白兔的";
-                //JieDuan = 4;
-                LabInitPos();
-                //showMes("好的，那下次再约喽,可以退出了。如果点错了的话，还可以点小白兔的");
-            }
-            if (JieDuan == 2) {
-                showMes(new string[] { "55555，请让我最后挣下", "要哭了哦" });
-            }
-        }
-
-        //回车键
-        private void Form1_KeyDown(object sender, KeyEventArgs e) {
-
-            if (e.KeyCode == Keys.Enter) {
-                string strPM = txt_PM.Text.ToLower();
-                for (int i = 0; i < exitPM.Length; i++) {
-                    if (exitPM[i].ToLower().Equals(strPM) && JieDuan == 0) {
-                        Client_SendMesg("3:停止瞬移");
-                        JieDuan = 1;
-                        tishi = "任意输入想对我说的话";
-                        showMes("小灰兔子失去瞬移技能");
-                        isDisRun = true;
-                        btn_disagree.Image = im_disagreeL[0];
-                        Thread runThred = new Thread(DisAgreeRun);
-                        runThred.Start();
-                        Thread speedThred = new Thread(Changespeed);
-                        speedThred.Start();
-                        txt_PM.Text = "";
-                        return;
-                    }
-                }
-                for (int i = 0; i < exit2PM.Length; i++) {
-                    if (exit2PM[i].ToLower().Equals(strPM)) {
-                        isExit = true;
-                        DateTime current = DateTime.Now;
-                        bool over = false;
-                        while (current.AddMilliseconds(500) > DateTime.Now) {
-                            for (int y = 0; y < exitbools.Length; y++) {
-                                if (!exitbools[y]) {
-                                    break;
-                                }
-                                over = true;
-                                break;
-                            }
-                            if (over) {
-                                break;
-                            }
-                        }
-                        Client_SendMesg("4:直接退出");
-                        isOver = true;
-                        System.Environment.Exit(0);
-                        //this.Close();
-                        txt_PM.Text = "";
-                        return;
-                    }
-                }
-                if (JieDuan == 1) {
-                    JieDuan = 2;
-                    Client_SendMesg("7:" + txt_PM.Text);
-                    txt_PM.Text = "";
-                    speed = 40;
-                    isDisRun = true;
-                } else if (JieDuan==5) {
-                    Client_SendMesg("8:" + txt_PM.Text);
-                    txt_PM.Text = "";
-                    showMes("嗯嗯，好的呢！那周末见哦，可以退出了哦");
-                } else if (JieDuan == 4) {
-                    Client_SendMesg("9:" + txt_PM.Text);
-                } else {
-                    txt_PM.Text = "无效";
-                    txt_PM.ForeColor = Color.Gray;
-                }
-            }
-        }
-        #endregion
-       
-            //休息
-            //public static void Delay(int mm) {
-            //    DateTime current = DateTime.Now;
-            //    while (current.AddMilliseconds(mm) > DateTime.Now) {
-            //        Application.DoEvents();
-            //    }
-            //    return;
-            //}
-
-
-        private void LabInitPos() {
-            //1366,768
-            int newX = (1366 - lab_mes.Size.Width) / 2;
-            lab_mes.Location = new System.Drawing.Point(newX, lab_mes.Location.Y);
-        }
-
-        
-        private void showMes(string s) {
-            lab_mes.Text =s;
-            LabInitPos();
-            isShowMes = true;
-        }
-        private void showMes(string[] strs) {
-            Random r = new Random();
-            int index = r.Next(1,strs.Length);
-            string s = strs[index - 1];
-            showMes(s);
-        }
-        
 
         private void Client_SendMesg(string str) {
-            if (isConnectSucced) {
-                string sendStr = str;
-                byte[] sendBytes = Encoding.Unicode.GetBytes(sendStr);
+            //发送消息
+            string sendStr = str;
+            byte[] sendBytes = Encoding.ASCII.GetBytes(sendStr);
+            client_socket.Close();
 
-                try {
-                    client_socket.Close();
-                    client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    client_socket.Connect(ipe);
-                    client_socket.Send(sendBytes);
-                } catch (Exception) {
-                }
-            }
-            
-        }
-
-        private void TimeCheck() {
-            string sLasttime = MyIni.ReadIniData("Time", "Last", "0", Path_Ini);
-            int.TryParse(sLasttime, out nLastTime);
-            var strTime = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
-            nNowTime = (int)strTime.TotalSeconds;
-            int cha = nNowTime - nLastTime;
-
-            if (cha > 100) {
-                isFirst = true;
-                //背景图设置
-                pictureBox1.Image = BgDraws[0];
-
-            } else {
-                isCGOver = true;
-                showMes(donotit);
-                isFirst = false;
-                pictureBox1.Image = BgDraws[24];
-                btn_agree.Location = new Point(811, 270);
-                btn_disagree.Location = new Point(496, 319);
-                showMes("点击阿狸，会有帮助！");
-            }
-            if (!isFirst) {
-                isBegin = true;
-            }
-        }
-
-        private void ClientInit() {
-            string ipStr = "127.0.0.1";
-            //string ipStr = "192.168.46.182";
-            int port = 8888;
-            IPAddress ip = IPAddress.Parse(ipStr);
-            ipe = new IPEndPoint(ip, port);
-            //创建客户端socket
-            client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //连接服务器
             try {
+                client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 client_socket.Connect(ipe);
-                Thread thread = new Thread(MyThread_recive);
-                thread.Start();
-                isConnectSucced = true;
+                client_socket.Send(sendBytes);
             } catch (Exception) {
-                isConnectSucced = false;
+                //textBox1.Text = "Failure";
             }
         }
-
-        private void MyThread_recive() {
-            while (!isExit) {
-                try {
-                    //接收消息
-                    string recStr = "";
-                    byte[] recBytes = new byte[1024];
-                    int bytes = client_socket.Receive(recBytes, recBytes.Length, 0);
-                    recStr += Encoding.Unicode.GetString(recBytes, 0, bytes);
-                    resiveMesg = recStr;// "From Server messages: {0}" + recStr;
-                    if (resiveMesg.Equals("N")|| resiveMesg.Equals("n")) {
-                        showMes("这句话好有深度，我还想听其他的话");
-                        if (JieDuan == 2) {
-                            JieDuan = 1;
-                        }
-                    } else if (resiveMesg.Equals("Y")|| resiveMesg.Equals("y")) {
-                        showMes("我也是");
-                        if (JieDuan == 2) {
-                            JieDuan = 3;
-                        }
-                    } else if (resiveMesg.Equals("O")|| resiveMesg.Equals("o")) {
-                        showMes("蟹蟹");
-                        //JieDuan = 3;
-                    } else {
-                        isClientFlash = true;
-                        Thread.Sleep(50);
-                        showMes(resiveMesg);
-                    }
-                } catch (Exception) {
-
-                }
-            }
-            exitbools[4] = true;
-        }
-
     }
 }

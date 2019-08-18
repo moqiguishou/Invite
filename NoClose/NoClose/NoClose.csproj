@@ -94,8 +94,5 @@
   <ItemGroup>
     <None Include="Properties\dis_agree.png" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Properties\draw\bg_Ali_chat2.jpg" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
